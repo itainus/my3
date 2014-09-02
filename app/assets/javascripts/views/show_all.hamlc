@@ -1,0 +1,69 @@
+
+%h1
+  %a{"href" => "#"}
+    My Tree
+%button#new-link-btn.btn.btn-sm.btn-primary{"data-target" => "#newLink", "data-toggle" => "modal", 'ng-click'=>"set_edit_link_fields(false)"} New Link
+  %i.fa.fa-leaf
+%button#new-category-btn.btn.btn-sm.btn-primary{"data-target" => "#newCategory", "data-toggle" => "modal"} New Category
+  %i.fa.fa-tag
+%select#friends-form.form-control1{'ng-change' => "show_friend_tree()", 'ng-model' => "friend", 'ng-options' => 'friend as (friend.email) for friend in friends', :style => "display: inline-block; float: right;"}
+  %option{:value => '', :disabled => 'disabled', :selected => 'selected'}
+    my tree
+
+!= JST['views/new_category']()
+!= JST['views/new_link']()
+!= JST['views/edit_link']()
+
+%br
+%br
+
+
+%div#tree-canvas-stats.btn-group
+  %button.btn.btn-sm.btn.dropdown-toggle{'type'=>"button", 'data-toggle'=>"dropdown"}
+    %span.caretj
+    %i.fa.fa-list-ul
+  %ul.dropdown-menu{'role'=>"menu"}
+    %li
+      %a{'href'=>"#"}
+        Action 1
+    %li
+      %a{'href'=>"#"}
+        Action 2
+    %li.divider
+    %li
+      %a{'href'=>"#"}
+        Action 3
+
+.row
+  %div#tree-canvas-container.col-md-4
+    %canvas#tree-canvas
+    %canvas#tip-canvas{:width => 100, :height => 25, 'title' => 'Already got this link...'}
+  .col-md-8
+    %table.table
+      %thead.capitalize
+        %tr{'ng-show' => "tree.leafs"}
+          %th 
+          %th.panel_topic.text-primary{'ng-click' => "predicate = 'category_id'; reverse=!reverse"}
+            category
+          %th.panel_topic.text-primary
+            name
+      %tbody
+        %tr{'ng-repeat' => "leaf in tree.leafs | orderBy:predicate:reverse"}
+          %td{'ng-if' => '!is_mytree()'}
+            %button.btn.btn-sm.btn-primary{'ng-if' => '!is_link_already_in_mytree(leaf.link.id)', 'ng-click'=>"add_link_to_mytree(leaf)", 'title' => 'Add link to myTree'}
+              %i.fa.fa-plus
+              %i.fa.fa-leaf
+            %span.star{'ng-if' => 'is_link_already_in_mytree(leaf.link.id)', 'title' => 'Already got this link...'}
+              %i.fa.fa-leaf
+          %td{'ng-if' => 'is_mytree()'}
+            %button.btn.btn-sm.btn-primary{'ng-click'=>"delete_link(leaf.id)"}
+              %i.fa.fa-trash-o
+            %button.btn.btn-sm.btn-primary{"data-target" => "#editLink", "data-toggle" => "modal", 'ng-click'=>"set_edit_link_fields(leaf)"}
+              %i.fa.fa-pencil
+          %td.panel_topic
+            %i.fa.fa-tag{'ng-if' => 'is_category_already_in_mytree(leaf.link.category_id)'}
+            {{get_category_name(leaf.link.category_id)}}
+          %td.panel_topic
+            %i.fa.fa-leaf{'ng-if' => 'is_link_already_in_mytree(leaf.link.id)'}
+            %a{target: "_blank", href:"{{leaf.link.url}}", title: "{{leaf.link.url}}"}
+              {{leaf.name}}
