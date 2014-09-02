@@ -1,0 +1,29 @@
+
+
+gem install pg -- --with-pg-config=/Library/PostgreSQL/9.3/bin/pg_config
+
+bundle install
+
+rails generate devise:install
+
+rake db:create
+
+rails g devise user
+
+rake db:migrate
+
+rails generate model Tree name:string user:references
+
+rails generate model Category name:string category:references
+
+rails generate model Branch tree:references category:references
+
+rails generate model Link url:string category:references
+
+rails generate model Leaf name:string tree:references link:references
+
+rails generate model Friend user:references
+rails destroy model Friend
+rake db:migrate:down VERSION=20140828193020
+
+gem install angularjs-rail

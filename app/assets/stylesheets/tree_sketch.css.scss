@@ -1,0 +1,43 @@
+// Place all the styles related to the Friend controller here.
+// They will automatically be included in application.css.
+// You can use Sass (SCSS) here: http://sass-lang.com/
+
+button {
+  z-index: 2
+}
+
+#tree-canvas-container {
+  position:relative;
+//  display: block;
+  height: 500px;
+//  width: 1000px;
+  display: inline-block;
+}
+
+#tree-canvas {
+//  height: 100%;
+//  width: 100%;
+
+//  position: absolute;
+//  left: -500px;
+//  top: -250px;
+//  z-index: 2;
+
+}
+
+#tip-canvas {
+  display: none;
+  background-color: white;
+  border: 1px solid darkgreen;
+  position: absolute;
+  left: 0px;
+  top: 0px;
+//  z-index: 3;
+//  width: 100px;
+//  height: 25px;
+}
+
+#tree-canvas-stats {
+  font-size: 16px;
+  position: absolute;
+}

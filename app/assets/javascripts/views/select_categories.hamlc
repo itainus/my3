@@ -1,0 +1,11 @@
+-#%div.form-control1{'ng-repeat' => "(key, value) in categories"}
+  -# %select.form-control1{'ng-options' => "item for item in value", 'ng-init' => 1, 'ng-model'=>"value[index]"}item
+
+
+-#!= collection_select :category, :name, Category.select(:name).uniq.order('name ASC'), :id, :name, {:prompt => 'Select a Parent'},{:name => "categoryName"}
+-#%select#category-parent-form.form-control1{"ng-model"=>"categoryParentID", ng-repeat:"category in categories"}
+-#%option{value: {{category.id}}} {{category.name}}
+-#%select#category-parent-form.form-control1{"ng-model"=>"categoryParentID"}
+-#  %option{value: 1} root
+  -#%option{value: 2} social
+  -#%option{value: 3} network

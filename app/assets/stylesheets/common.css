@@ -1,0 +1,128 @@
+body {
+  padding-top: 40px;
+  padding-bottom: 40px;
+  background-color: #eee;
+}
+
+/* User sign in and sign forms. */
+.border-form-div {
+  max-width: 300px;
+  padding: 19px 29px 29px;
+  margin: 0 auto 20px;
+  background-color: #fff;
+  border: 1px solid #e5e5e5;
+  -webkit-border-radius: 15px;
+     -moz-border-radius: 15px;
+          border-radius: 15px;
+  -webkit-box-shadow: 0 1px 2px rgba(0,0,0,.015);
+     -moz-box-shadow: 0 1px 2px rgba(0,0,0,.015);
+          box-shadow: 0 1px 2px rgba(0,0,0,.015);
+}
+.border-form-div .form-signin-heading,
+.border-form-div .checkbox {
+  margin-bottom: 10px;
+}
+.border-form-div input[type="text"],
+.border-form-div input[type="email"],
+.border-form-div input[type="password"] {
+  font-size: 16px;
+  height: auto;
+  margin-bottom: 15px;
+  padding: 7px 9px;
+}
+
+.capitalize 
+{
+    text-transform:capitalize;
+}
+
+.inline {
+  display:inline;
+}
+
+.expend-sides {
+  padding: 0 20px 0 20px
+}
+
+table .progress {
+  margin-bottom: 0px;
+  margin-top: 5px;
+}
+
+.well .progress {
+  margin-top: 0px;
+}
+
+table .lead {
+  margin-bottom: 0px;
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+#ajax-icon {
+  position: absolute;
+  z-index: 9999;
+  top: 50%;
+  left: 50%;
+}
+
+#overlay {
+  width: 100%;
+  height: 100%;
+  z-index: 9998;
+  position:absolute;
+  left:0;
+  top:0;
+  background: rgba(0,0,0,.3);
+}
+
+.form-control1 {
+  display: block;
+  width: 300px;
+  height: 34px;
+  padding: 6px 12px;
+  font-size: 14px;
+  line-height: 1.428571429;
+  color: #555555;
+  vertical-align: left;
+  background-color: #ffffff;
+  border: 1px solid #cccccc;
+  border-radius: 4px;
+  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+          box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+  -webkit-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+          transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+}
+.lable_left{
+  text-align: left;
+}
+.insight_filter{
+  font-size: 11px;
+  width: 50px;
+  padding-left: 0;
+  padding-right: 0;
+
+}
+.panel_common{
+  width: 75%;
+}
+
+.panel_topic{
+  text-align:center;
+}
+
+.navbar-brand {
+  padding: 0 15px;
+}
+.navbar-brand img {
+  margin-top: 2px;
+  height: 47px;
+  width: 47px;
+}
+
+span.star {
+    font-size: 20px;
+    padding-left: 12px;
+}
