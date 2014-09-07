@@ -7,7 +7,6 @@ angular.module('Mytree.treeSketch', ['ngResource'])
     canvas = 0
     tipCanvas = 0
     ctx = 0
-    tipCtx = 0
     canvas = 0
     W = 0
     H = 0
@@ -49,9 +48,18 @@ angular.module('Mytree.treeSketch', ['ngResource'])
     showTooltip: (x, y, msg) ->
       tipCanvas.style.left = (x) + "px";
       tipCanvas.style.top = (y) + "px";
-      tipCtx.clearRect(0, 0, tipCanvas.width, tipCanvas.height);
-      tipCtx.fillText(msg, 5, 15);
+      tipCanvas.title = msg
+
       $('#tip-canvas').fadeIn()
+      $('#tip-canvas').removeClass('open')
+
+    getLinkByPoint: (x, y) ->
+      for l in m_links
+        dx = x - l.x
+        dy = y - l.y
+        if (dx * dx + dy * dy <= radius * radius)
+          return l
+      return null
 
     getCategoryByPoint: (x, y) ->
       for c in m_categories
@@ -73,7 +81,7 @@ angular.module('Mytree.treeSketch', ['ngResource'])
         a = (y1 - y2) / (x1 - x2);
         b = y1 - (a * x1)
 
-        console.log(x1, x, x2);
+#        console.log(x1, x, x2);
 
         res = a * x + b - y
 
@@ -82,20 +90,46 @@ angular.module('Mytree.treeSketch', ['ngResource'])
 
       return null
 
+    onCanvasClick: (e) ->
+      pt = t.getMouse(e, canvas);
+      name = ''
+      id = 0;
+      type = ''
+
+      l = t.getLinkByPoint(pt.x, pt.y)
+      if l
+        name = l.name
+        id = l.id
+        type = 'link'
+        icon = 'fa-leaf';
+      else
+        c = t.getCategoryByPoint(pt.x, pt.y)
+        if c
+          name = c.name
+          id = c.id
+          type = 'category'
+          icon = 'fa-tag';
+        else
+          return
+
+#      $('#tree-canvas-stats-menu').html('</i><i class="fa ' + icon + '"></i><b style="margin-left: 5px;"><i>' + name + '</i></b>')
+      $('#tree-canvas-stats-menu').attr('data-stats-type', type)
+      $('#tree-canvas-stats-menu').attr('data-stats-id', id)
+      $('#tip-canvas').addClass('open')
+      e.stopPropagation()
+      return
+
     onCanvasHover: (e) ->
       pt = t.getMouse(e, canvas);
 
-      for l in m_links
-        dx = pt.x - l.x
-        dy = pt.y - l.y
-        if (dx * dx + dy * dy <= radius * radius)
-#          console.log l
-          t.showTooltip(l.x + 15, l.y - 30, '[' + l.id + '] ' + l.name)
-          return
+      l = t.getLinkByPoint(pt.x, pt.y)
+      if l
+        t.showTooltip(l.x, l.y - 10, '[' + l.id + '] ' + l.name)
+        return
 
       c = t.getCategoryByPoint(pt.x, pt.y)
       if c
-        t.showTooltip(pt.x, pt.y, '[' + c.id + '] ' + c.name)
+        t.showTooltip(pt.x, pt.y - 10, '[' + c.id + '] ' + c.name)
         return
 
       $('#tip-canvas').fadeOut()
@@ -111,18 +145,15 @@ angular.module('Mytree.treeSketch', ['ngResource'])
       $('#tree-canvas').unbind('mousemove');
       $('#tree-canvas').bind('mousemove', t.onCanvasHover);
 
-      $('#tree-canvas').unbind('click');
-      $('#tree-canvas').bind('click', t.onCanvasClick);
+      $('#tip-canvas').unbind('click');
+      $('#tip-canvas').bind('click', t.onCanvasClick);
 
       $('#tip-canvas').hide()
 
       ctx = canvas.getContext("2d");
-      tipCtx = tipCanvas.getContext("2d");
       #Lets resize the canvas to occupy the full page
       W = canvas.width; #window.innerWidth;
       H = 400; #window.innerHeight;
-#      W = canvas.width #window.innerWidth;
-#      H = canvas.height #window.innerHeight;
 
       canvas.width = W;
       canvas.height = H;
@@ -153,9 +184,6 @@ angular.module('Mytree.treeSketch', ['ngResource'])
         else
           m_children[l.link.category_id] = 1
 
-#      m_categories = categories
-#      m_links = links;
-
       t.init()
 
     init: () ->
@@ -163,14 +191,14 @@ angular.module('Mytree.treeSketch', ['ngResource'])
       ctx.fillStyle = "transparent";
       ctx.fillRect(0, 0, W, H);
 
-
       length = 100 + Math.round(Math.random()*50);
-      console.log('tree first len:', length);
+      length = 150;
       #angle at which branches will diverge - 10-60
       divergence = 10 + Math.round(Math.random()*50);
       #Every branch will be 0.75times of the previous one - 0.5-0.75
       #with 2 decimal points
       reduction = Math.round(50 + Math.random()*20)/100;
+      reduction = 0.6;
       #width of the branch/trunk
       line_width = 10;
 
@@ -191,22 +219,15 @@ angular.module('Mytree.treeSketch', ['ngResource'])
 
       t.branches();
 
-
     #Lets draw the branches now
     branches: () ->
-
-      #reducing line_width and length
       length = length * reduction;
       line_width = line_width * reduction;
       ctx.lineWidth = line_width;
 
       new_start_points = [];
-#      ctx.beginPath();
 
-      #for(i = 0; i < start_points.length; i++)
-        #sp = start_points[i];
       for sp in start_points
-
         i = 1
         ctx.beginPath();
         ctx.strokeStyle = "brown";
@@ -232,16 +253,12 @@ angular.module('Mytree.treeSketch', ['ngResource'])
             c.spY = H-sp.y
             c.epX = ep.x
             c.epY = H-ep.y
-#            c.xDirection = c.epX - c.spX
-
 
             ctx.moveTo(sp.x, H-sp.y);
             ctx.lineTo(ep.x, H-ep.y);
-
             ctx.stroke();
 
             new_start_points.push(ep);
-
 
         ctx.stroke();
 
@@ -277,11 +294,9 @@ angular.module('Mytree.treeSketch', ['ngResource'])
 
       if (new_start_points.length)
         setTimeout(t.branches, 50);
-      else
-        #setTimeout(t.init, 500);
+
 
     get_endpoint: (x, y, a, length) ->
-
       epx = x + length * Math.cos(a*Math.PI/180);
       epy = y + length * Math.sin(a*Math.PI/180);
 
