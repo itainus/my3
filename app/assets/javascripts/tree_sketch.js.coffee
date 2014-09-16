@@ -14,12 +14,12 @@ angular.module('Mytree.treeSketch', ['ngResource'])
     divergence = 0
     reduction = 0
     line_width = 0
-    start_points = [];
+    start_points = []
     t = 0
     radius = 5
     m_children = []
-    m_categories = [];
-    m_links = [];
+    m_branches = []
+    m_leafs = []
 
 
     getMouse: (e, c) ->
@@ -37,8 +37,6 @@ angular.module('Mytree.treeSketch', ['ngResource'])
           offsetX += element.offsetLeft
 
 #is part is not strictly necessary, it depends on your styling
-#    offsetX += stylePaddingLeft + styleBorderLeft + htmlLeft;
-#    offsetY += stylePaddingTop + styleBorderTop + htmlTop;
 
       mx = e.pageX - offsetX;
       my = e.pageY - offsetY;
@@ -53,22 +51,22 @@ angular.module('Mytree.treeSketch', ['ngResource'])
       $('#tip-canvas').fadeIn()
       $('#tip-canvas').removeClass('open')
 
-    getLinkByPoint: (x, y) ->
-      for l in m_links
+    getLeafByPoint: (x, y) ->
+      for l in m_leafs
         dx = x - l.x
         dy = y - l.y
         if (dx * dx + dy * dy <= radius * radius)
           return l
       return null
 
-    getCategoryByPoint: (x, y) ->
-      for c in m_categories
-        spx = c.spX;
-        spy = c.spY
-        epx = c.epX
-        epy = c.epY
+    getBranchByPoint: (x, y) ->
+      for b in m_branches
+        spx = b.spX;
+        spy = b.spY
+        epx = b.epX
+        epy = b.epY
 
-        if c.id == 1
+        if b.category.id == 1
           continue
 
         if ((y > spy) || (y < epy))
@@ -78,15 +76,15 @@ angular.module('Mytree.treeSketch', ['ngResource'])
         y1 = epy
         x2 = spx
         y2 = spy
-        a = (y1 - y2) / (x1 - x2);
-        b = y1 - (a * x1)
+        A = (y1 - y2) / (x1 - x2);
+        B = y1 - (A * x1)
 
 #        console.log(x1, x, x2);
 
-        res = a * x + b - y
+        res = A * x + B - y
 
-        if c.width >= Math.abs(res)
-          return c
+        if b.width >= Math.abs(res)
+          return b
 
       return null
 
@@ -96,19 +94,20 @@ angular.module('Mytree.treeSketch', ['ngResource'])
       id = 0;
       type = ''
 
-      l = t.getLinkByPoint(pt.x, pt.y)
+      l = t.getLeafByPoint(pt.x, pt.y)
       if l
         name = l.name
         id = l.id
-        type = 'link'
-        icon = 'fa-leaf';
+        type = 'leaf'
+        $('#tree-canvas-stats-goto').attr("href", l.link.url);
+        $('#tree-canvas-stats-goto').show()
       else
-        c = t.getCategoryByPoint(pt.x, pt.y)
-        if c
-          name = c.name
-          id = c.id
-          type = 'category'
-          icon = 'fa-tag';
+        b = t.getBranchByPoint(pt.x, pt.y)
+        if b
+          name = b.category.name
+          id = b.id
+          type = 'branch'
+          $('#tree-canvas-stats-goto').hide()
         else
           return
 
@@ -122,14 +121,14 @@ angular.module('Mytree.treeSketch', ['ngResource'])
     onCanvasHover: (e) ->
       pt = t.getMouse(e, canvas);
 
-      l = t.getLinkByPoint(pt.x, pt.y)
+      l = t.getLeafByPoint(pt.x, pt.y)
       if l
         t.showTooltip(l.x, l.y - 10, '[' + l.id + '] ' + l.name)
         return
 
-      c = t.getCategoryByPoint(pt.x, pt.y)
-      if c
-        t.showTooltip(pt.x, pt.y - 10, '[' + c.id + '] ' + c.name)
+      b = t.getBranchByPoint(pt.x, pt.y)
+      if b
+        t.showTooltip(pt.x, pt.y - 10, '[' + b.category.id + '] ' + b.category.name)
         return
 
       $('#tip-canvas').fadeOut()
@@ -159,11 +158,14 @@ angular.module('Mytree.treeSketch', ['ngResource'])
       canvas.height = H;
 
       m_children = []
+      m_leafs = []
       m_links = []
+      m_branches = []
       m_categories = []
 
+
       for b in branches
-        m_categories.push(b.category)
+        m_branches.push(b)
         b.category.id *= 1
         b.category.category_id *= 1
 
@@ -175,15 +177,13 @@ angular.module('Mytree.treeSketch', ['ngResource'])
           m_children[b.category.category_id] = 1
 
       for l in leafs
-        l.link.name = l.name
-        m_links.push(l.link)
+        m_leafs.push(l)
         l.link.id *= 1
         l.link.category_id *= 1
         if (m_children[l.link.category_id])
           m_children[l.link.category_id] += 1
         else
           m_children[l.link.category_id] = 1
-
       t.init()
 
     init: () ->
@@ -234,25 +234,25 @@ angular.module('Mytree.treeSketch', ['ngResource'])
 
         nBranches = m_children[sp.id]
 
-        for c in m_categories
-          if c.category_id == sp.id && c.id != sp.id
+        for b in m_branches
+          if b.category.category_id == sp.id && b.category.id != sp.id
 
             angle = Math.round((180 / (nBranches + 1)) * i + ((Math.random() * 10) - 5))
 
             i++
 
             ep = t.get_endpoint(sp.x, sp.y, angle, length);
-            ep.id = c.id
+            ep.id = b.category.id
 
             ctx.lineWidth = line_width * Math.round(50 + Math.random()*20)/100;
 
-            c.len = length;
-            c.width = line_width
-            c.angle = angle
-            c.spX = sp.x
-            c.spY = H-sp.y
-            c.epX = ep.x
-            c.epY = H-ep.y
+            b.len = length;
+            b.width = line_width
+            b.angle = angle
+            b.spX = sp.x
+            b.spY = H-sp.y
+            b.epX = ep.x
+            b.epY = H-ep.y
 
             ctx.moveTo(sp.x, H-sp.y);
             ctx.lineTo(ep.x, H-ep.y);
@@ -262,9 +262,8 @@ angular.module('Mytree.treeSketch', ['ngResource'])
 
         ctx.stroke();
 
-        for l in m_links
-          if l.category_id == sp.id
-
+        for l in m_leafs
+          if l.link.category_id == sp.id
             ctx.beginPath();
             ctx.fillStyle = 'lightgreen';
             ctx.strokeStyle = "green";
@@ -274,11 +273,11 @@ angular.module('Mytree.treeSketch', ['ngResource'])
             i++
 
             ep = t.get_endpoint(sp.x, sp.y, angle, length);
-            ctx.moveTo(sp.x, H-sp.y);
-            ctx.lineTo(ep.x, H-ep.y);
+            ctx.moveTo(sp.x, H - sp.y);
+            ctx.lineTo(ep.x, H - ep.y);
 
             l.x = ep.x
-            l.y = H-ep.y
+            l.y = H - ep.y
 
             ctx.stroke();
             ctx.beginPath();

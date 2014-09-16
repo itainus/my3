@@ -1,0 +1,73 @@
+<!doctype html>
+<html>
+  <head>
+    <title>My3 Extension</title>
+    <style>
+      body {
+        min-width: 257px;
+        overflow-x: hidden;
+      }
+
+      img {
+        margin: 5px;
+        border: 2px solid black;
+        vertical-align: middle;
+        width: 75px;
+        height: 75px;
+      }
+    </style>
+
+    <!--
+      - JavaScript and HTML must be in separate files: see our Content Security
+      - Policy documentation[1] for details and explanation.
+      -
+      - [1]: http://developer.chrome.com/extensions/contentSecurityPolicy.html
+     -->
+    <script src="jquery-2.1.1.js"></script>
+
+    <link rel="stylesheet" href="bootstrap/3.2.0/css/bootstrap.min.css">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="bootstrap/3.2.0/css/bootstrap-theme.min.css">
+
+    <link rel="stylesheet" href="my3.css">
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="bootstrap/3.2.0/js/bootstrap.min.js"></script>
+
+    <script src="my3.js"></script>
+  </head>
+  <body>
+
+    <div id="main-container">
+
+      <div id="tree-container"> </div>
+      <form class="form-horizontal" role="form" id="add-link-form">
+        <div class="form-group">
+          <label class="col-sm-3 control-label" for="add-link-name">Name</label>
+          <div class="col-sm-7">
+            <input class="form-control" id="add-link-name" type="string" placeholder="Enter name">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-sm-3 control-label" for="add-link-url">Url</label>
+          <div class="col-sm-7">
+            <input class="form-control" id="add-link-url" type="string" placeholder="Enter url">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-sm-3 control-label" for="add-link-category">Category</label>
+          <div class="col-sm-8">
+            <select class="form-control" id="add-link-category" placeholder="Enter category" style="display: inline-block;">
+              
+            </select>
+          </div>
+        </div>
+        <div>
+          <button id="add-link-btn" class="btn btn-primary" type="button">Save</button>
+        </div>
+      </form>
+  </div>
+  </body>
+</html>
+

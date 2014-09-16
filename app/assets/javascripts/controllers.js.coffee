@@ -12,10 +12,12 @@ ctrls.controller 'MyController',
       $scope.set_friends()
       $("#new-category-btn").attr("disabled", null);
       $("#new-link-btn").attr("disabled", null);
+      $("#tree-canvas-stats").hide();
 
     $scope.set_tree = ()->
-      Services.get_tree().then (tree)->
-        console.log(tree)
+      Services.get_trees().then (trees)->
+        console.log(trees)
+        tree = trees[0];
         $scope.tree = tree
         $scope.myTree = tree
         $scope.sketch_tree()
@@ -104,9 +106,12 @@ ctrls.controller 'MyController',
       $scope.sketch_tree()
       $("#new-category-btn").attr("disabled", "disabled");
       $("#new-link-btn").attr("disabled", "disabled");
+      $("#tree-canvas-stats").show();
       return
 
     $scope.is_mytree = ()->
+      if (!$scope.myTree)
+        return true
       return $scope.tree.id == $scope.myTree.id
 
     $scope.is_link_already_in_mytree = (linkID)->
@@ -116,7 +121,6 @@ ctrls.controller 'MyController',
       return false
 
     $scope.is_category_already_in_mytree = (categoryID)->
-      console.log(categoryID)
       for branch in $scope.myTree.branches
         if (branch.category.id == categoryID)
           return true
@@ -126,6 +130,46 @@ ctrls.controller 'MyController',
       Services.add_link($scope.myTree.id, leaf.link.id, leaf.name).then (myTree)->
         $scope.myTree = myTree
         $scope.tree = $scope.tree
+
+    $scope.add_category_to_mytree = (category_id)->
+      Services.add_category($scope.myTree.id, category_id).then (myTree)->
+        $scope.myTree = myTree
+        $scope.tree = $scope.tree
+
+    $scope.get_leaf_by_id = (id) ->
+      for leaf in $scope.tree.leafs
+        if (leaf.id == id)
+          return leaf
+      return null
+
+    $scope.tree_stats = (action)->
+
+      statType =  $('#tree-canvas-stats-menu').attr('data-stats-type')
+      statID =  $('#tree-canvas-stats-menu').attr('data-stats-id') * 1
+
+      console.log('tree_stats - ' + action + ' - '  + statType + ' - ' + statID)
+
+      if (statType == 'leaf')
+        if (action == 'add')
+         null
+        if (action == 'follow')
+          null
+        if (action == 'edit')
+          null
+        if (action == 'delete')
+          null
+
+      if (statType == 'branch')
+        if (action == 'add')
+          null
+        if (action == 'follow')
+          null
+        if (action == 'edit')
+          null
+        if (action == 'delete')
+          null
+
+      return false
 
     $scope.initialize()
 

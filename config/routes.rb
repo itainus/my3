@@ -9,10 +9,12 @@ Rails.application.routes.draw do
   # get 'tree/index'
   # post "tree/category_create"
 
-  get "home/tree" => "home#tree"
+  get "home/trees" => "home#trees"
   get "home/friends" => "home#friends"
   post "home/tree" => "home#tree"
+  get "home/test" => "home#test"
 
+  get "tree/" => "tree#index"
   get "tree/:id" => "tree#index"
 
 
@@ -24,6 +26,7 @@ Rails.application.routes.draw do
   post "tree/:id/link_remove" => "tree#remove_link"
   post "tree/:id/link_update" => "tree#update_link"
 
+  get "tree/:id/suggest_branch" => "tree#suggest_branch"
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 

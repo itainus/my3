@@ -27,14 +27,28 @@ button {
 
 #tip-canvas {
   display: none;
-  background-color: white;
-  border: 1px solid darkgreen;
+  background-color: transparent;
   position: absolute;
   left: 0px;
   top: 0px;
 //  z-index: 3;
 //  width: 100px;
 //  height: 25px;
+}
+
+#tree-canvas-stats-btn {
+  opacity: 0;
+}
+
+#tree-canvas-stats-menu {
+  top: 10px;
+  left: 15px;
+  opacity: 0.9;
+  min-width: 20px;
+}
+
+#tree-canvas-stats-menu > li > a {
+  padding: 3px 10px;
 }
 
 #tree-canvas-stats {

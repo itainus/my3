@@ -1,0 +1,18 @@
+{
+  "manifest_version": 2,
+
+  "name": "My3",
+  "description": "My3 add link",
+  "version": "1.0",
+
+  "browser_action": {
+    "default_icon": "tree.png",
+    "default_popup": "popup.html"
+  },
+  "permissions": [
+    "tabs",
+    "https://secure.flickr.com/",
+    "http://localhost:3000/"
+  ]
+
+}

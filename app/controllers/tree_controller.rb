@@ -105,6 +105,19 @@ class TreeController < ApplicationController
     render_leafs
   end
 
+  def suggest_branch
+    link_url = params[:link_url]
+    Rails.logger.info "[DEBUG INFO] ############## TreeController - suggest_branch - url = #{link_url}"
+    cats = Link.suggest_categories(link_url)
+    Rails.logger.info "[DEBUG INFO] ############## TreeController - suggest_branch - done"
+
+    # render_leafs
+    # render json: cats.first.first
+    cat = cats.first ? Category.find(cats.first.second) : cats.first
+
+    render json: cat
+  end
+
   private
 
     def render_tree

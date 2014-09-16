@@ -17,4 +17,17 @@ class Link < ActiveRecord::Base
     return link
   end
 
+  def self.suggest_categories(link_url)
+
+    # Link.join
+    # Rails.logger.info Link.where(:url => link_url).categories.as_json
+    x = Category.joins(:links, :branches).where('links.url' => link_url).group('categories.id').order('count_categories_id desc').count('categories.id')
+    # x = Link.where(:url => link_url).count(:category_id).maximum()
+    # x = Link.select("category_id, count(category_id) as cid").group("category_id")
+
+    # Rails.logger.info x.first.as_json
+
+    return x
+  end
+
 end
