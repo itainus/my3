@@ -11,6 +11,7 @@
   },
   "permissions": [
     "tabs",
+    "cookies",
     "https://secure.flickr.com/",
     "http://localhost:3000/"
   ]

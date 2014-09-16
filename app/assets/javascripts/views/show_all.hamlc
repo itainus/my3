@@ -41,7 +41,7 @@
         %li{'ng-if' => 'is_mytree()'}
           %a#tree-canvas-stats-delete{'onclick' => 'return false;', 'href'=>"#", 'ng-click'=>"tree_stats('delete')"}
             %i.fa.fa-trash-o
-  .col-md-8
+  .col-md-8{:style => "height: 370px; overflow:auto;"}
     %table.table
       %thead.capitalize
         %tr{'ng-show' => "tree.leafs"}

@@ -1,7 +1,19 @@
 
+function getCookie(cname) {
+    var name = cname + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0; i<ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1);
+        if (c.indexOf(name) != -1) return c.substring(name.length,c.length);
+    }
+    return "";
+}
+
 var My3 = {
 
-	treeID: 62,
+	treeID: 0,
+    xsrfToken: '',
 
 	addLinkCallback: function(e)
 	{
@@ -24,11 +36,6 @@ var My3 = {
 			div.innerHTML = tablink;
 	      	document.body.appendChild(div);
 		});
-
-
-
-
-      	
 	},
 
 	addLink: function()
@@ -50,7 +57,9 @@ var My3 = {
 			
 				var trees = e;
 				var tree = trees[0];//JSON.parse(e);
-			  	var treeID = tree.id;
+
+                My3.treeID = tree.id;
+                var treeID = tree.id;
 			  	var treeName = tree.name;
 			  
 				$('#tree-container').text('[' + treeID + ']' + treeName);		  	
@@ -58,27 +67,27 @@ var My3 = {
 				$('#add-link-name').val(tabTitle);
 				$('#add-link-url').val(tabLink);
 
-				var addLinkCategorySelect = $('#add-link-category')
+                $.ajax({
+                    url: "http://localhost:3000/tree/" + My3.treeID + "/suggest_branch",
+                    context: document.body,
+                    type: "GET",
+                    data: {link_url: tabLink},
+                    dataType: 'json'
+                }).done(function(category) {
 
-				$.each(tree.branches, function() {
-					var b = this;
-					//console.log(b)
-				    addLinkCategorySelect.append('<option value="' + b.category.id + '">' + b.category.name + '</option>');//.val(leaf.id).text(this.Name));
-				});
-			});
+                    var addLinkCategorySelect = $('#add-link-category');
 
-			var linkUrl = tabLink;
-			linkUrl = "b.com";
+                    if (category) {
+                        addLinkCategorySelect.append('<option value="' + category.id + '">' + category.name + '</option>');
+                        addLinkCategorySelect.append('<option disabled="disabled" value="?">' + '__________________________' + '</option>');
+                    }
 
-			$.ajax({
-		  		url: "http://localhost:3000/tree/" + My3.treeID + "/suggest_branch",
-		  		context: document.body,
-		  		type: "GET",
-				data: {link_url: linkUrl},
-			}).done(function(e) {
-
-		  		console.log(this);
-		  		console.log(e);
+                    $.each(tree.branches, function() {
+                        var b = this;
+                        //console.log(b)
+                        addLinkCategorySelect.append('<option value="' + b.category.id + '">' + b.category.name + '</option>');//.val(leaf.id).text(this.Name));
+                    });
+                });
 			});
 		});  
 	}
@@ -86,9 +95,21 @@ var My3 = {
 
 
 document.addEventListener('DOMContentLoaded', function () {
-	My3.addLink();
 
-	
+    var details = {
+        'url' : 'http://localhost:3000/',
+        'name' : 'XSRF-TOKEN'
+    };
+
+    chrome.cookies.get(details, function(cookie){
+
+        console.log(cookie);
+
+        My3.xsrfToken = decodeURIComponent(cookie.value);
+    });
+
+    My3.addLink();
+
 	$( "#add-link-btn" ).click(function() {
 
 		var data = {
@@ -96,6 +117,8 @@ document.addEventListener('DOMContentLoaded', function () {
 			link_url: $('#add-link-url').val(),
 			link_category_id: $('#add-link-category').val()
 		};
+
+        //var xsrfToken = "p9OKwdItdwdt+sR7M6SIllZrpH8/gW8ANcMULSBM4fo=";
 
 		$.ajax({
 			type: "POST",
@@ -105,14 +128,14 @@ document.addEventListener('DOMContentLoaded', function () {
 			success: function(response)
 			{
 				console.log(response);
-				alert( "added!" );
+				//alert( "added!" );
 			},
 			fail: function(e)
 			{
 				console.error(e);
 			}
 			,headers: { 
-		        "X-XSRF-TOKEN" : "p9OKwdItdwdt+sR7M6SIllZrpH8/gW8ANcMULSBM4fo="
+		        "X-XSRF-TOKEN" : My3.xsrfToken
 	        }
 		});
 	});
