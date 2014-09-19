@@ -126,3 +126,8 @@ span.star {
     font-size: 20px;
     padding-left: 12px;
 }
+
+
+.group-horizontal a {
+    margin-right: 30px;
+}

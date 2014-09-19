@@ -13,6 +13,10 @@ angular.module('Mytree.services', ['ngResource'])
       $http.post('/tree/' + tree_id + '/category_add', {category_id: category_id}).then (resp) ->
         return resp.data
 
+    delete_category: (tree_id, branch_id) ->
+      $http.post('/tree/' + tree_id + '/category_remove', {branch_id: branch_id}).then (resp) ->
+        return resp.data
+
     create_link: (tree_id, name, url, parent_id) ->
       $http.post('/tree/' + tree_id + '/link_create', {link_name: name, link_url: url, link_category_id: parent_id}).then (resp) ->
         return resp.data

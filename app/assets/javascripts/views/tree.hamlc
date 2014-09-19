@@ -1,7 +1,6 @@
 
-%h1
-  %a{"href" => "#"}
-    My Tree
+%button#btn.btn.btn-sm.btn-primary{'ng-click'=>"sketch_tree()"}
+  %i.fa.fa-random
 %button#new-link-btn.btn.btn-sm.btn-primary{"data-target" => "#newLink", "data-toggle" => "modal", 'ng-click'=>"set_edit_link_fields(false)"} New Link
   %i.fa.fa-leaf
 %button#new-category-btn.btn.btn-sm.btn-primary{"data-target" => "#newCategory", "data-toggle" => "modal"} New Category
@@ -58,7 +57,7 @@
               %i.fa.fa-leaf
             %span.star{'ng-if' => 'is_link_already_in_mytree(leaf.link.id)', 'title' => 'Already got this link...'}
               %i.fa.fa-leaf
-          %td{'ng-if' => 'is_mytree()'}
+          %td{'ng-if' => 'is_mytree()', :width =>90}
             %button.btn.btn-sm.btn-primary{'ng-click'=>"delete_link(leaf.id)"}
               %i.fa.fa-trash-o
             %button.btn.btn-sm.btn-primary{"data-target" => "#editLink", "data-toggle" => "modal", 'ng-click'=>"set_edit_link_fields(leaf)"}

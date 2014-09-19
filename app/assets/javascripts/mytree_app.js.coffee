@@ -2,8 +2,8 @@ angular.module('mytree',['ngRoute', 'Mytree.controllers', 'Mytree.services', 'My
   ($routeProvider)->
     $routeProvider
       .when('/', {
-        template: JST['views/show_all'],
+        template: JST['views/tree'],
         controller: 'MyController'
-        })
+      })
       .otherwise({redirectTo: '/'})
 )

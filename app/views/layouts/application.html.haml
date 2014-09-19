@@ -3,7 +3,8 @@
   %head
     %meta{:charset => "utf-8"}
     %meta{:name => "viewport", :content => "width=device-width, initial-scale=1, maximum-scale=1"}
-    %title= content_for?(:title) ? yield(:title) : "mytree"
+    %link{:rel=>"icon",  :type=>"image/png",  :href=>"assets/tree.png"}
+    %title= content_for?(:title) ? yield(:title) : "my3"
     = csrf_meta_tags
     %meta{:content => "", :name => "description"}
     %meta{:content => "", :name => "author"}
@@ -11,8 +12,9 @@
     = stylesheet_link_tag "application", :media => "all"
     = yield(:head)
   %body
-
     .navbar.navbar-inverse.navbar-fixed-top
+      %a.navbar-left{:href=>"#", :style=>"padding:5px;"}
+        -#%img{:src=>"assets/tree-white.png", :title=>"My3", :style=>"width:42px;height:42px;border:0"}
       .container
         .navbar-header
           %span.navbar-left

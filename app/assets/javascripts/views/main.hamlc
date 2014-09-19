@@ -1,0 +1,15 @@
+
+#main.container-fluid.fullHeight
+  {{setActive('main')}}
+  .row-fluid.fullHeight{"ng-init"=>"component='tree'"}
+    .group-horizontal
+      %button{:href => "#", "ng-click" => "setViewComponent('tree')"} Tree
+      %button{:href => "#", "ng-click" => "setViewComponent('friends')"} Friends
+    %hr
+
+    .span10
+      %div{"ng-switch"=>"", "on" => "component"}
+        %div{"ng-switch-when" => "tree"}
+          != JST['views/tree']()
+        %div{"ng-switch-when" => "friends"}
+          != JST['views/friends']()

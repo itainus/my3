@@ -19,14 +19,18 @@ Rails.application.routes.draw do
 
 
   post "tree/:id/category_create" => "tree#create_new_category"
-  post "tree/:id/category_add" => "tree#add_category"
-  post "tree/:id/link_create" => "tree#create_new_link"
-  post "tree/:id/link_add" => "tree#add_link"
+  post "tree/:id/category_add"    => "tree#add_category"
+  post "tree/:id/category_remove" => "tree#remove_category"
 
+  post "tree/:id/link_create" => "tree#create_new_link"
+  post "tree/:id/link_add"    => "tree#add_link"
   post "tree/:id/link_remove" => "tree#remove_link"
   post "tree/:id/link_update" => "tree#update_link"
 
   get "tree/:id/suggest_branch" => "tree#suggest_branch"
+
+  get "friends" => "friend#index"
+
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 

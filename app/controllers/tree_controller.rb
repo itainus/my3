@@ -47,6 +47,19 @@ class TreeController < ApplicationController
     render_branches
   end
 
+  def remove_category
+    branch_id = params[:branch_id]
+    Rails.logger.info "[DEBUG INFO] ############## TreeController - remove_category - branch_id = #{branch_id} ##############"
+
+    if @tree.branches.exists?(branch_id)
+      @tree.branches.destroy(branch_id)
+    else
+      Rails.logger.info "[DEBUG INFO] branch '#{branch_id}' dose not exists"
+    end
+
+    render_branches
+  end
+
   def create_new_link
     link_name = params[:link_name]
     link_url = params[:link_url]
@@ -109,13 +122,18 @@ class TreeController < ApplicationController
     link_url = params[:link_url]
     Rails.logger.info "[DEBUG INFO] ############## TreeController - suggest_branch - url = #{link_url}"
     cats = Link.suggest_categories(link_url)
-    Rails.logger.info "[DEBUG INFO] ############## TreeController - suggest_branch - done"
 
-    # render_leafs
-    # render json: cats.first.first
-    cat = cats.first ? Category.find(cats.first.second) : cats.first
 
-    render json: cat
+    if (cats.first)
+      category = Category.find(cats.first.first)
+      Rails.logger.info "[DEBUG INFO] ############## TreeController - suggest_branch - done - category_id = #{category.id} - name = #{category.name}"
+      render json: category
+    else
+      Rails.logger.info "[DEBUG INFO] ############## TreeController - suggest_branch - done - no suggest"
+      render json: {}
+    end
+
+
   end
 
   private

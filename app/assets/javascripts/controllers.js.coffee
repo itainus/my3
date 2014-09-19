@@ -5,6 +5,9 @@ ctrls.controller 'MyController',
   ($scope, Services, TreeSketch)->
 
     $scope.initialize = ()->
+
+#      $location.path('edit')
+
       console.log "initialize"
       $scope.tree = {}
       $scope.friends = []
@@ -38,19 +41,24 @@ ctrls.controller 'MyController',
       TreeSketch.drawTree(branches, leafs)
 
     $scope.save_category = ()->
-      angular.element('#newCategory').modal('hide')
       Services.create_category($scope.tree.id, $scope.categoryName, $scope.categoryParentID).then (branches)->
+#        console.log('create_category cb')
+        angular.element('#newCategory').modal('hide');
         $scope.categoryName = '';
         $scope.categoryParentID = 1;
-
+        newCategory = branches[branches.length-1].category
         if ($scope.toggleLinkModal == 'newLink')
-          $scope.linkCategoryID = resp.id
+          $scope.linkCategoryID = newCategory.id
           angular.element('#newLink').modal('show')
           $scope.toggleLinkModal = false
         else if ($scope.toggleLinkModal == 'editLink')
-          $scope.linkCategoryID = resp.id
+          $scope.linkCategoryID = newCategory.id
           angular.element('#editLink').modal('show')
           $scope.toggleLinkModal = false
+        $scope.reset_tree_branches(branches)
+
+    $scope.delete_category = (branchID)->
+      Services.delete_category($scope.tree.id, branchID).then (branches)->
         $scope.reset_tree_branches(branches)
 
     $scope.save_link = ()->
@@ -143,33 +151,45 @@ ctrls.controller 'MyController',
       return null
 
     $scope.tree_stats = (action)->
-
       statType =  $('#tree-canvas-stats-menu').attr('data-stats-type')
       statID =  $('#tree-canvas-stats-menu').attr('data-stats-id') * 1
 
       console.log('tree_stats - ' + action + ' - '  + statType + ' - ' + statID)
 
       if (statType == 'leaf')
+        leaf = $scope.get_leaf_by_id(statID)
         if (action == 'add')
-         null
+          $scope.add_link_to_mytree(leaf)
         if (action == 'follow')
           null
         if (action == 'edit')
-          null
+          $scope.set_edit_link_fields(leaf)
+          angular.element('#newLink').modal('show');
         if (action == 'delete')
-          null
-
+          $scope.delete_link(statID)
       if (statType == 'branch')
         if (action == 'add')
-          null
+          $scope.add_category_to_mytree(statID)
         if (action == 'follow')
           null
         if (action == 'edit')
-          null
+          $scope.edit_category(statID)
         if (action == 'delete')
-          null
+          $scope.delete_category(statID)
 
+
+
+
+    $scope.setActive = (e) ->
+      console.log('setActive', $scope.categoryName, $scope)
+
+    $scope.setViewComponent = (component) ->
+      return false
+      $scope.component = component
+      console.log('setViewComponent')
       return false
 
+#
+#    $scope.component = 'tree'
     $scope.initialize()
 

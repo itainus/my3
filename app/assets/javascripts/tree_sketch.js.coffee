@@ -139,6 +139,11 @@ angular.module('Mytree.treeSketch', ['ngResource'])
 
       t = this
       canvas = document.getElementById("tree-canvas");
+
+#      if (!canvas)
+#        alert('xanvas')
+#        return
+
       tipCanvas = document.getElementById("tip-canvas");
 
       $('#tree-canvas').unbind('mousemove');

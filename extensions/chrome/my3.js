@@ -75,9 +75,11 @@ var My3 = {
                     dataType: 'json'
                 }).done(function(category) {
 
+                    console.log(category);
+
                     var addLinkCategorySelect = $('#add-link-category');
 
-                    if (category) {
+                    if (category.id) {
                         addLinkCategorySelect.append('<option value="' + category.id + '">' + category.name + '</option>');
                         addLinkCategorySelect.append('<option disabled="disabled" value="?">' + '__________________________' + '</option>');
                     }
@@ -129,6 +131,7 @@ document.addEventListener('DOMContentLoaded', function () {
 			{
 				console.log(response);
 				//alert( "added!" );
+                window.close();
 			},
 			fail: function(e)
 			{
