@@ -12,8 +12,11 @@ function getCookie(cname) {
 
 var My3 = {
 
+    trees: null,
+    treeIndex: 0,
 	treeID: 0,
     xsrfToken: '',
+    suggestCategory: {},
 
 	addLinkCallback: function(e)
 	{
@@ -38,6 +41,31 @@ var My3 = {
 		});
 	},
 
+    populateCategories: function()
+    {
+        var suggestCategory = My3.suggestCategory;
+        var treeIndex = My3.treeIndex;
+        var tree = My3.trees[treeIndex];
+
+        var addLinkCategorySelect = $('#add-link-category');
+        var addCategoryParentSelect = $('#add-category-parent');
+
+        addLinkCategorySelect.empty();
+        addCategoryParentSelect.empty();
+
+        if (suggestCategory.id) {
+            addLinkCategorySelect.append('<option value="' + suggestCategory.id + '">' + suggestCategory.name + '</option>');
+            addLinkCategorySelect.append('<option disabled="disabled" value="?">' + '__________________________' + '</option>');
+        }
+
+        $.each(tree.branches, function() {
+            var b = this;
+            //console.log(b)
+            addLinkCategorySelect.append('<option value="' + b.category.id + '">' + b.category.name + '</option>');//.val(leaf.id).text(this.Name));
+            addCategoryParentSelect.append('<option value="' + b.category.id + '">' + b.category.name + '</option>');
+        });
+    },
+
 	addLink: function()
 	{
 		console.log ('my3 - addLink');
@@ -50,20 +78,16 @@ var My3 = {
 			$.ajax({
 		  		url: "http://localhost:3000/home/trees",
 		  		context: document.body
-			}).done(function(e) {
-
-		  		console.log(this);
-		  		console.log(e);
+			}).done(function(t) {
 			
-				var trees = e;
-				var tree = trees[0];//JSON.parse(e);
+				My3.trees = t;
+                var treeIndex = My3.treeIndex;
+				var tree = My3.trees[treeIndex];//JSON.parse(e);
 
                 My3.treeID = tree.id;
-                var treeID = tree.id;
 			  	var treeName = tree.name;
 			  
-				$('#tree-container').text('[' + treeID + ']' + treeName);		  	
-
+				$('#tree-container').text(treeName);
 				$('#add-link-name').val(tabTitle);
 				$('#add-link-url').val(tabLink);
 
@@ -76,19 +100,10 @@ var My3 = {
                 }).done(function(category) {
 
                     console.log(category);
+                    My3.suggestCategory = category;
 
-                    var addLinkCategorySelect = $('#add-link-category');
+                    My3.populateCategories();
 
-                    if (category.id) {
-                        addLinkCategorySelect.append('<option value="' + category.id + '">' + category.name + '</option>');
-                        addLinkCategorySelect.append('<option disabled="disabled" value="?">' + '__________________________' + '</option>');
-                    }
-
-                    $.each(tree.branches, function() {
-                        var b = this;
-                        //console.log(b)
-                        addLinkCategorySelect.append('<option value="' + b.category.id + '">' + b.category.name + '</option>');//.val(leaf.id).text(this.Name));
-                    });
                 });
 			});
 		});  
@@ -112,15 +127,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
     My3.addLink();
 
-	$( "#add-link-btn" ).click(function() {
+	$( "#save-link-btn" ).click(function() {
 
 		var data = {
 			link_name: $('#add-link-name').val(),
 			link_url: $('#add-link-url').val(),
 			link_category_id: $('#add-link-category').val()
 		};
-
-        //var xsrfToken = "p9OKwdItdwdt+sR7M6SIllZrpH8/gW8ANcMULSBM4fo=";
 
 		$.ajax({
 			type: "POST",
@@ -142,4 +155,47 @@ document.addEventListener('DOMContentLoaded', function () {
 	        }
 		});
 	});
+
+
+    $('#add-category-form-back').click(function(e) {
+        e.stopPropagation();
+        $('#add-category-form').hide();
+        $('#add-link-form').show();
+    });
+
+    $('#add-category-btn').click(function() {
+        $('#add-link-form').hide();
+        $('#add-category-form').show();
+    });
+
+    $('#save-category-btn').click(function() {
+
+        var data = {
+            category_name: $('#add-category-name').val(),
+            category_parent_id: $('#add-category-parent').val()
+        };
+
+        $.ajax({
+            type: "POST",
+            url: "http://localhost:3000/tree/" + My3.treeID + "/category_create",
+            data: data,
+            dataType: 'json',
+            success: function(tree)
+            {
+                console.log(tree);
+                My3.trees[My3.treeIndex] = tree;
+                My3.populateCategories();
+
+                $('#add-category-form').hide();
+                $('#add-link-form').show();
+            },
+            fail: function(e)
+            {
+                console.error(e);
+            }
+            ,headers: {
+                "X-XSRF-TOKEN" : My3.xsrfToken
+            }
+        });
+    });
 });

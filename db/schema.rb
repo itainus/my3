@@ -42,12 +42,12 @@ ActiveRecord::Schema.define(version: 20140828201254) do
 
   create_table "leafs", force: true do |t|
     t.string  "name"
-    t.integer "tree_id"
+    t.integer "branch_id"
     t.integer "link_id"
   end
 
+  add_index "leafs", ["branch_id"], name: "index_leafs_on_branch_id", using: :btree
   add_index "leafs", ["link_id"], name: "index_leafs_on_link_id", using: :btree
-  add_index "leafs", ["tree_id"], name: "index_leafs_on_tree_id", using: :btree
 
   create_table "links", force: true do |t|
     t.string   "url"

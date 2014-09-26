@@ -46,7 +46,8 @@ angular.module('Mytree.treeSketch', ['ngResource'])
     showTooltip: (x, y, msg) ->
       tipCanvas.style.left = (x) + "px";
       tipCanvas.style.top = (y) + "px";
-      tipCanvas.title = msg
+#      tipCanvas.title = msg
+      $("#tip-canvas").tooltip('hide').attr('data-original-title', msg).tooltip('show');
 
       $('#tip-canvas').fadeIn()
       $('#tip-canvas').removeClass('open')
@@ -123,21 +124,23 @@ angular.module('Mytree.treeSketch', ['ngResource'])
 
       l = t.getLeafByPoint(pt.x, pt.y)
       if l
-        t.showTooltip(l.x, l.y - 10, '[' + l.id + '] ' + l.name)
+        t.showTooltip(l.x + 8, l.y - 7, '[' + l.id + '][' + l.link.id + '] ' + l.name)
         return
 
       b = t.getBranchByPoint(pt.x, pt.y)
       if b
-        t.showTooltip(pt.x, pt.y - 10, '[' + b.category.id + '] ' + b.category.name)
+        t.showTooltip(pt.x, pt.y - 7, '[' + b.id + '][' + b.category.id + '] ' + b.category.name)
         return
 
       $('#tip-canvas').fadeOut()
 
 
-    drawTree: (branches, leafs) ->
-      console.log "drawing tree..."
+    drawTree: (branches, leafs, filter) ->
+
+      console.log ("drawing tree...")
 
       t = this
+      t.filter = !!filter
       canvas = document.getElementById("tree-canvas");
 
 #      if (!canvas)
@@ -157,7 +160,7 @@ angular.module('Mytree.treeSketch', ['ngResource'])
       ctx = canvas.getContext("2d");
       #Lets resize the canvas to occupy the full page
       W = canvas.width; #window.innerWidth;
-      H = 400; #window.innerHeight;
+      H = canvas.height;#400; #window.innerHeight;
 
       canvas.width = W;
       canvas.height = H;
@@ -176,6 +179,7 @@ angular.module('Mytree.treeSketch', ['ngResource'])
 
         if (b.category.id == 1)
           continue
+
         if (m_children[b.category.category_id])
           m_children[b.category.category_id] += 1
         else
@@ -189,6 +193,7 @@ angular.module('Mytree.treeSketch', ['ngResource'])
           m_children[l.link.category_id] += 1
         else
           m_children[l.link.category_id] = 1
+
       t.init()
 
     init: () ->
@@ -197,7 +202,7 @@ angular.module('Mytree.treeSketch', ['ngResource'])
       ctx.fillRect(0, 0, W, H);
 
       length = 100 + Math.round(Math.random()*50);
-      length = 150;
+      length = 250;
       #angle at which branches will diverge - 10-60
       divergence = 10 + Math.round(Math.random()*50);
       #Every branch will be 0.75times of the previous one - 0.5-0.75
@@ -207,8 +212,11 @@ angular.module('Mytree.treeSketch', ['ngResource'])
       #width of the branch/trunk
       line_width = 10;
 
+      trunk_length = length+50;
+      trunk_length = 200;
+
 #This is the end point of the trunk, from where branches will diverge
-      trunk = {x: W/2, y: length+50, angle: 90, id: 1, parentID: 1};
+      trunk = {x: W/2, y: trunk_length, angle: 90, id: 1, parentID: 1};
 #It becomes the start point for branches
       start_points = []; #empty the start points on every init();
       start_points.push(trunk);
@@ -218,6 +226,7 @@ angular.module('Mytree.treeSketch', ['ngResource'])
       ctx.beginPath();
       ctx.moveTo(trunk.x, H-50);
       ctx.lineTo(trunk.x, H-trunk.y);
+      ctx.fillStyle = 'brown';
       ctx.strokeStyle = "brown";
       ctx.lineWidth = line_width;
       ctx.stroke();
@@ -235,33 +244,49 @@ angular.module('Mytree.treeSketch', ['ngResource'])
       for sp in start_points
         i = 1
         ctx.beginPath();
+        ctx.fillStyle = 'brown';
         ctx.strokeStyle = "brown";
 
         nBranches = m_children[sp.id]
 
         for b in m_branches
-          if b.category.category_id == sp.id && b.category.id != sp.id
+          if (b.category.id == sp.id)
+            bParent = b
+            break
 
-            angle = Math.round((180 / (nBranches + 1)) * i + ((Math.random() * 10) - 5))
+        for b in m_branches
+          if ((b.category.category_id == sp.id) && (b.category.id != sp.id))
 
-            i++
+            if (bParent.angle)
+              bParentAngle = bParent.angle
+            else
+              bParentAngle = 0
+
+#            console.log(bParent.category.name, bParentAngle)
+
+            angle = Math.round((180 / (nBranches + 1)) * (i++) + ((Math.random() * 10) - 5))
+
+#            angle -= bParentAngle
 
             ep = t.get_endpoint(sp.x, sp.y, angle, length);
             ep.id = b.category.id
 
-            ctx.lineWidth = line_width * Math.round(50 + Math.random()*20)/100;
+            lw = line_width * Math.round(50 + Math.random()*20)/100;
+
 
             b.len = length;
-            b.width = line_width
+            b.width = lw
             b.angle = angle
             b.spX = sp.x
             b.spY = H-sp.y
             b.epX = ep.x
             b.epY = H-ep.y
 
-            ctx.moveTo(sp.x, H-sp.y);
-            ctx.lineTo(ep.x, H-ep.y);
-            ctx.stroke();
+            if (!t.filter || b.keep)
+              ctx.lineWidth = lw;
+              ctx.moveTo(sp.x, H-sp.y);
+              ctx.lineTo(ep.x, H-ep.y);
+              ctx.stroke();
 
             new_start_points.push(ep);
 
@@ -269,30 +294,36 @@ angular.module('Mytree.treeSketch', ['ngResource'])
 
         for l in m_leafs
           if l.link.category_id == sp.id
-            ctx.beginPath();
-            ctx.fillStyle = 'lightgreen';
-            ctx.strokeStyle = "green";
-            ctx.lineWidth = 1
 
-            angle = Math.round((180 / (nBranches + 1)) * i + 0*((Math.random() * 10) - 5))
-            i++
-
-            ep = t.get_endpoint(sp.x, sp.y, angle, length);
-            ctx.moveTo(sp.x, H - sp.y);
-            ctx.lineTo(ep.x, H - ep.y);
+            angle = Math.round((180 / (nBranches + 1)) * (i++) + ((Math.random() * 10) - 5))
+            ep = t.get_endpoint(sp.x, sp.y, angle, length * reduction);
 
             l.x = ep.x
             l.y = H - ep.y
 
-            ctx.stroke();
-            ctx.beginPath();
+            if (!t.filter || l.keep)
+              ctx.beginPath();
+              ctx.fillStyle = 'lightgreen';
+              ctx.strokeStyle = "green";
+              ctx.lineWidth = 1
+              ctx.moveTo(sp.x, H - sp.y);
+              ctx.lineTo(ep.x, H - ep.y);
+              ctx.stroke();
+              img = new Image();
+              img.src = 'https://fbstatic-a.akamaihd.net/rsrc.php/yl/r/H3nktOa7ZMg.ico'
+              img.src = 'http://www.google.com/s2/favicons?domain=' + l.link.url
+              img.src = 'http://g.etfv.co/' + l.link.url
+              img.leaf = l
+              img.onload = () ->
+                ctx.drawImage(this, this.leaf.x - 8, this.leaf.y - 8, 16, 16);
+                ctx.stroke();
 
-            centerX = ep.x
-            centerY = H - ep.y
+#            ctx.beginPath();
+#            ctx.arc(l.x, l.y, radius, 0, 2 * Math.PI, false);
+#            ctx.fill();
+#            ctx.stroke();
+#            debugger;
 
-            ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
-            ctx.fill();
-            ctx.stroke();
 
       start_points = new_start_points;
 

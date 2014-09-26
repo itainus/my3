@@ -1,0 +1,39 @@
+html {
+    border-radius: 10px;
+    /*border: 1px solid red;*/
+}
+
+body {
+    background: #eeeeee;
+    border-radius: 10px;
+}
+
+#main-container {
+    width: 300px;
+    padding: 10px;
+    border: 1px solid #000000;
+}
+
+.save-btn {
+    left: 50%;
+    position: relative;
+    margin-left: -30px;
+}
+
+.form-control {
+    /*width: 180px;*/
+}
+
+.form-group .control-label {
+    display: block;
+}
+
+#select-category-container {
+    display: inline-block;
+    width: 75%;
+    width: 239px;
+}
+
+#add-category-container {
+    display: inline-block;
+}

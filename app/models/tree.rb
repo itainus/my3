@@ -4,12 +4,12 @@ class Tree < ActiveRecord::Base
   has_many :branches, :dependent => :destroy
   has_many :categories, :through => :branches
 
-  has_many :leafs, :dependent => :destroy
-  has_many :links, :through => :leafs
+  # has_many :leafs, :dependent => :destroy
+  # has_many :links, :through => :leafs
 
   @@static_categories = ["Adds other software","Alcohol","Allows remote connect","Allows remote control","Anonymizer","Any","Art / Culture","Autostarts/Stays Resident","BitTorrent protocol","Blogs / Personal Pages","Botnets","Browser Plugin","Browser Toolbar","Bundles Software","Business / Economy","Business Applications","Child Abuse","Cloud Services","Communication Standard","Computers / Internet","Content Provider and Sharing","Critical Risk","Cryptocurrency","Download Manager","eDonkey","Education","Email","Encrypts communications","Entertainment","Facebook Business","Facebook Education","Facebook Entertainment","Facebook File Sharing","Facebook Friends & Family","Facebook Games","Facebook Lifestyle","Facebook Popular","Facebook Sports","Facebook Utilities","Facebook Widgets","Fashion","File Storage and Sharing","Financial Services","Friendster Widgets","FTP Protocol","Gambling","Games","General","Gnutella protocol","Google Plus Widgets","Google Talk protocol","Government / Military","Greeting Cards","Hacking","Hate / Racism","Health","High Bandwidth","High Risk","Illegal / Questionable","Illegal Drugs","IM Aggregator","Inactive Sites","Instant Chat","Instant Messaging","IPTV","IRC protocol","Jabber protocol","Job Search / Careers","Lifestyle","Lingerie and Swimsuit / Suggestive","LinkedIn Widgets","Linux Installer","Logs e-mail","Logs IM","Low Risk","Mac Installer","Media Sharing","Media Streams","Medium Risk","Micro blogging","Mobile Software","MySpace Entertainment","MySpace Games","MySpace Lifestyle","MySpace Popular","MySpace Sports","MySpace Utilities","MySpace Widgets","Nature / Conservation","Network Protocols","Network Utilities","News / Media","Newsgroups / Forums","Ning.com Widgets","nolog app","Non-profits & NGOs","Nudity","Opens ports","Orkut Entertainment","Orkut Games","Orkut Lifestyle","Orkut Popular","Orkut Sports","Orkut Utilities","Orkut Widgets","Oscar protocol","P2P File Sharing","Personals / Dating","Phishing","Political / Legal","Pornography","Port agility","Real Estate","Recreation","Religion","Remote Administration","Restaurants / Dining / Food","SCADA Protocols","Search Engines / Portals","Sends mail","Sex","Sex Education","Share Files","Share links","Share Music","Share photos","Share videos","Shopping","SMS Tools","Social Networking","Social Plugins","Software Downloads","Software Update","Spam","Sports","Spyware / Malicious Sites","SSL Protocol","Stealth Tactics","Streaming Media Protocols","Supports File Transfer","Supports IM","Supports Streaming","Supports video/webcam","Supports VoIP","Tasteless","Torrent Trackers","Translation","Transmits Information","Travel","Tunnels","Twitter Clients","UDP Protocol","Uncategorized","Unknown Traffic","URL Filtering","Used for Web-Based Support","Vehicles","Very Low Risk","Video Conferencing","Violence","Virtual Worlds","Voice Mail","VoIP","Weapons","Web Advertisements","Web Based Instant Messaging","Web Browser","Web Browser Acceleration","Web Conferencing","Web Content Aggregators","Web Desktop","Web Services Provider","Web Spider","Windows Messenger protocol","Yahoo Messenger protocol"]
   @@static_links = ["adobe.com","Akamaihdelivery","alibaba.c","aliexpress.c","alipay.com","amazon.co","amazon.co","amazon."," apple.com","ask.com","baidu.com","bbc.co.uk","bing.com","blogger.com","blogspot.c","bp.blogspot.c","Chinadaily.com","Clkmon.co","cnn.com","craigslist.o","dailymail.co.","dailymotion.c","ebay.com","ebay.d","espn.go.co","facebook.c","fc2.com","gmw.com","go.com","godaddy.com","google.co","google.co","hao123.com","huffingt","ifeng.co","imdbabase","imgur.com","indiatimes.c","instagram.cage sharing","kickass.ing","linkedin.c","live.c engine","mail.ru","microsoft.c and technology","msn.com","neobux.com","netflix.com","odnoklassniktworking","PayPal.com","people.com","pinterest.c","pornhub.com","qq.com","rakuten.co.j","reddit.com","sina.com.c","sohu.com","soso.co","stackoverflo","ening service","taobao.com","thepiratebaysharing","tmall.com","tumblr.com","twitter.com","vk.com","vube.com","weibo.coicroblogging","wikipedia.com","wordpress.com","wordpress.ishing platform","xhamster.com","xinhuanet.com","xnxx.com","xvideos.com","yahoo.co.","yahoo.com","yandex.ru","youku.com","youtube.com"]
-  @@static_leaf_names =["360 Safeguard","About.com","Adcash","Adobe Systems","Akamai Technologies","Alibaba Group","AliExpress","Alipay","Amazon Japan","Amazon.com","Amazon Germany","Apple Inc.","Ask.com","Baidu","BBC","Bing","Blogger","Blogspot","Blogspot","China Daily","RevenueHits","CNN","Craigslist","Daily Mail","Dailymotion","eBay","eBay Germany","ESPN.com","Facebook","FC2, Inc.","Guangming Online","Go.com","GoDaddy","Google Canada","Google Indonesia","Google India","Google Japan","Google UK","Google","Google Australia","Google Brazil","Google Hong Kong","Google Mexico","Google Turkey","Google Germany","Google Spain","Google France","Google Italy","Google Poland","Google Russia","Google User Content","Hao123","The Huffington Post","Ifeng News","Internet Movie Database","Imgur","Indiatimes","Instagram","KickassTorrents","LinkedIn","Windows Live","Mail.Ru","Microsoft","MSN","Neobux","Netflix","Odnoklassniki","PayPal","People's Daily","Pinterest","Pornhub","Tencent QQ","Rakuten","Reddit","Sina Corp","Sohu","Soso.com","Stack Overflow","t.co URL Shortening Service","Taobao","The Pirate Bay","Tmall","tumblr","Twittera","VKontakte","Vube","Sina Weibo","Wikipedia","WordPress.com","Wordpress.org","xHamster","Xinhua News","Xnxx","XVideos","Yahoo! Japan","Yahoo!","Yandex","Youku","YouTube"]
+  @@static_leaf_names = ["360 Safeguard","About.com","Adcash","Adobe Systems","Akamai Technologies","Alibaba Group","AliExpress","Alipay","Amazon Japan","Amazon.com","Amazon Germany","Apple Inc.","Ask.com","Baidu","BBC","Bing","Blogger","Blogspot","Blogspot","China Daily","RevenueHits","CNN","Craigslist","Daily Mail","Dailymotion","eBay","eBay Germany","ESPN.com","Facebook","FC2, Inc.","Guangming Online","Go.com","GoDaddy","Google Canada","Google Indonesia","Google India","Google Japan","Google UK","Google","Google Australia","Google Brazil","Google Hong Kong","Google Mexico","Google Turkey","Google Germany","Google Spain","Google France","Google Italy","Google Poland","Google Russia","Google User Content","Hao123","The Huffington Post","Ifeng News","Internet Movie Database","Imgur","Indiatimes","Instagram","KickassTorrents","LinkedIn","Windows Live","Mail.Ru","Microsoft","MSN","Neobux","Netflix","Odnoklassniki","PayPal","People's Daily","Pinterest","Pornhub","Tencent QQ","Rakuten","Reddit","Sina Corp","Sohu","Soso.com","Stack Overflow","t.co URL Shortening Service","Taobao","The Pirate Bay","Tmall","tumblr","Twittera","VKontakte","Vube","Sina Weibo","Wikipedia","WordPress.com","Wordpress.org","xHamster","Xinhua News","Xnxx","XVideos","Yahoo! Japan","Yahoo!","Yandex","Youku","YouTube"]
 
   def self.create_new(user_id, name)
     Rails.logger.info "[DEBUG INFO] ############## Tree - create_new - user_id = #{user_id}, name = #{name} ##############"
@@ -22,28 +22,43 @@ class Tree < ActiveRecord::Base
     Rails.logger.info "[DEBUG INFO] ############## Tree - branch_category - category_id = #{category_id} ##############"
 
     category = Category.find(category_id)
-
+    original_category_id = category_id
     if category.present?
       while !self.branches.exists?(:category_id => category_id)
         Rails.logger.info "[DEBUG INFO] adding branch (category_id = #{category_id})"
         self.branches.create(:tree_id => self.id, :category_id => category_id)
         category_id = category.category_id
       end
+
+      self.branches.where(:category_id => original_category_id).first
     else
       Rails.logger.info "[DEBUG INFO] category '#{category_id}' dose not exists"
     end
   end
 
+  def leaf_exists(leaf_id)
+    self.branches.joins(:leafs).where('leafs.id' => leaf_id).exists?
+  end
+
+  def link_exists(link_id)
+    self.branches.joins(leafs: :link).where('links.id' => link_id).exists?
+  end
+
   def leaf_link(link, link_name)
     Rails.logger.info "[DEBUG INFO] ############## Tree - leaf_link - link_id = #{link.id}, link_name = '#{link_name}' ##############"
 
-    if self.links.exists?(:id => link.id)
+    if self.link_exists(link.id)
       Rails.logger.info "[DEBUG INFO] tree already has leaf with link_id = #{link.id}"
     else
       Rails.logger.info "[DEBUG INFO] adding leaf (link_id = #{link.id})"
-      self.leafs.create(:tree_id => self.id, :link_id => link.id, :name => link_name)
 
-      self.branch_category(link.category_id)
+      branch = self.branch_category(link.category_id)
+
+      if branch
+        branch.leafs.create(:branch_id => branch.id, :link_id => link.id, :name => link_name)
+      else
+        Rails.logger.info "[DEBUG INFO] failed to create branch"
+      end
     end
   end
 
@@ -89,6 +104,9 @@ class Tree < ActiveRecord::Base
     return tree
 
   end
+
+
+
 
   private
   def category_params

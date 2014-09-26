@@ -1,1 +1,1 @@
-//= require_tree ./bootstrap
+//= require_tree ./bootstrap-3.2.0-dist

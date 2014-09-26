@@ -1,14 +1,22 @@
 ctrls = angular.module('Mytree.controllers',[])
 
-ctrls.controller 'MyController',
+ctrls.controller 'FriendsController',
+  ($scope, Services, TreeSketch)->
+    console.log('FriendsController')
 
+ctrls.controller 'MyController',
   ($scope, Services, TreeSketch)->
 
     $scope.initialize = ()->
 
 #      $location.path('edit')
+#      $('#tip-canvas').tooltip()
+#      $('#btn').tooltip()
+      $('#btn').tooltip();
+      $('#new-link-btn').tooltip();
 
-      console.log "initialize"
+
+      console.log ("initialize")
       $scope.tree = {}
       $scope.friends = []
       $scope.set_tree()
@@ -25,28 +33,26 @@ ctrls.controller 'MyController',
         $scope.myTree = tree
         $scope.sketch_tree()
 
-    $scope.reset_tree_branches = (branches)->
-      $scope.tree.branches = branches
-      $scope.myTree.branches = branches
+    $scope.reset_tree = (tree)->
+      $scope.tree = tree
+      $scope.myTree = tree
       $scope.sketch_tree()
 
-    $scope.reset_tree_leafs = (leafs)->
-      $scope.tree.leafs = leafs
-      $scope.myTree.leafs = leafs
-      $scope.sketch_tree()
-
-    $scope.sketch_tree = ()->
+    $scope.sketch_tree = (filter)->
       branches = $scope.tree.branches
-      leafs = $scope.tree.leafs
-      TreeSketch.drawTree(branches, leafs)
+      leafs = []
+      for b in branches
+        for l in b.leafs
+          leafs.push(l)
+      TreeSketch.drawTree(branches, leafs, filter)
 
     $scope.save_category = ()->
-      Services.create_category($scope.tree.id, $scope.categoryName, $scope.categoryParentID).then (branches)->
+      Services.create_category($scope.tree.id, $scope.categoryName, $scope.categoryParentID).then (tree)->
 #        console.log('create_category cb')
         angular.element('#newCategory').modal('hide');
         $scope.categoryName = '';
         $scope.categoryParentID = 1;
-        newCategory = branches[branches.length-1].category
+        newCategory = tree.branches[tree.branches.length-1].category
         if ($scope.toggleLinkModal == 'newLink')
           $scope.linkCategoryID = newCategory.id
           angular.element('#newLink').modal('show')
@@ -55,37 +61,37 @@ ctrls.controller 'MyController',
           $scope.linkCategoryID = newCategory.id
           angular.element('#editLink').modal('show')
           $scope.toggleLinkModal = false
-        $scope.reset_tree_branches(branches)
+        $scope.reset_tree(tree)
 
     $scope.delete_category = (branchID)->
-      Services.delete_category($scope.tree.id, branchID).then (branches)->
-        $scope.reset_tree_branches(branches)
+      Services.delete_category($scope.tree.id, branchID).then (tree)->
+        $scope.reset_tree(tree)
 
     $scope.save_link = ()->
-      Services.create_link($scope.tree.id, $scope.linkName, $scope.linkUrl, $scope.linkCategoryID).then (leafs)->
+      Services.create_link($scope.tree.id, $scope.linkName, $scope.linkUrl, $scope.linkCategoryID).then (tree)->
         $scope.linkName = '';
         $scope.linkCategoryID = 1;
         $scope.linkUrl = '';
-        $scope.reset_tree_leafs(leafs)
+        $scope.reset_tree(tree)
 
     $scope.delete_link = (leafID)->
-      Services.delete_link($scope.tree.id, leafID).then (leafs)->
-        $scope.reset_tree_leafs(leafs)
+      Services.delete_link($scope.tree.id, leafID).then (tree)->
+        $scope.reset_tree(tree)
 
     $scope.edit_link = (leafID)->
-      Services.update_link($scope.tree.id, leafID, $scope.linkName, $scope.linkUrl, $scope.linkCategoryID).then (leafs)->
-        $scope.reset_tree_leafs(leafs)
+      Services.update_link($scope.tree.id, leafID, $scope.linkName, $scope.linkUrl, $scope.linkCategoryID).then (tree)->
+        $scope.reset_tree(tree)
 
-    $scope.get_category_name = (category_id)->
-      for branch in $scope.tree.branches
-        if(branch.category.id == category_id)
-          return branch.category.name
+#    $scope.get_category_name = (category_id)->
+#      for branch in $scope.tree.branches
+#        if(branch.category.id == category_id)
+#          return branch.category.name
 
-    $scope.set_link_name = (link)->
-      for leaf in $scope.tree.leafs
-        if(leaf.link_id == link.id)
-          link.name = leaf.name
-          return leaf.name
+#    $scope.set_link_name = (link)->
+#      for leaf in $scope.tree.leafs
+#        if(leaf.link_id == link.id)
+#          link.name = leaf.name
+#          return leaf.name
 
     $scope.toggle_new_link_modal = (type)->
       $scope.toggleLinkModal = type
@@ -123,9 +129,11 @@ ctrls.controller 'MyController',
       return $scope.tree.id == $scope.myTree.id
 
     $scope.is_link_already_in_mytree = (linkID)->
-      for leaf in $scope.myTree.leafs
-        if (leaf.link.id == linkID)
-          return true
+#      alert(linkID)
+      for branch in $scope.myTree.branches
+        for leaf in branch.leafs
+          if (leaf.link.id == linkID)
+            return true
       return false
 
     $scope.is_category_already_in_mytree = (categoryID)->
@@ -145,9 +153,10 @@ ctrls.controller 'MyController',
         $scope.tree = $scope.tree
 
     $scope.get_leaf_by_id = (id) ->
-      for leaf in $scope.tree.leafs
-        if (leaf.id == id)
-          return leaf
+      for branch in $scope.tree.branches
+        for leaf in branch.leafs
+          if (leaf.id == id)
+            return leaf
       return null
 
     $scope.tree_stats = (action)->
@@ -180,8 +189,8 @@ ctrls.controller 'MyController',
 
 
 
-    $scope.setActive = (e) ->
-      console.log('setActive', $scope.categoryName, $scope)
+    $scope.setActive = (el) ->
+      console.log('setActive', el)
 
     $scope.setViewComponent = (component) ->
       return false
@@ -189,7 +198,46 @@ ctrls.controller 'MyController',
       console.log('setViewComponent')
       return false
 
-#
+    $scope.filter_tree = (el) ->
+      console.log(el)
+      console.log(this)
+      console.log($scope.filterBy)
+      q = $scope.filterBy
+
+      if (!q)
+        $scope.sketch_tree(false)
+        return
+
+      branches_array = []
+      leafs_array = []
+      branches = {}
+      leafs = {}
+
+      for b in $scope.tree.branches
+        b.keep = false
+        for l in b.leafs
+          link = l.link
+          if (link.url.indexOf(q) != -1)
+            leafs_array.push(l)
+            leafs[l.id] = l
+            branches[b.id] = b
+            l.keep = true
+            b.keep = true
+          else
+            l.keep = false
+
+      for k,b of branches
+        for tb in $scope.tree.branches
+          if tb.category.id == b.category.category_id
+            branches[tb.id] = tb
+            tb.keep = true
+
+
+      $scope.sketch_tree(true)
+
+      return true
+
+
 #    $scope.component = 'tree'
     $scope.initialize()
 

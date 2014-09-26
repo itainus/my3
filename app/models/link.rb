@@ -1,7 +1,7 @@
 class Link < ActiveRecord::Base
   belongs_to :category
   has_many :leafs, :dependent => :destroy
-  has_many :trees, :through => :leafs
+  has_many :branches, :through => :leafs
 
 
   def self.create_if_not_exists(link_url, link_category_id)

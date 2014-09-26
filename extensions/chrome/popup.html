@@ -34,39 +34,61 @@
 
     <!-- Latest compiled and minified JavaScript -->
     <script src="bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script src="bootstrap/ui-bootstrap-0.11.0.js"></script>
 
     <script src="my3.js"></script>
   </head>
   <body>
-
     <div id="main-container">
-
-      <div id="tree-container"> </div>
-      <form class="form-horizontal" role="form" id="add-link-form">
-        <div class="form-group">
-          <label class="col-sm-3 control-label" for="add-link-name">Name</label>
-          <div class="col-sm-7">
+        <div id="tree-container" style="display: none;"> </div>
+      <form id="add-link-form" class="form-horizontal" role="form">
+          <div class="form-group">
+          <label class="col-sm-2 control-label" for="add-link-name">Name</label>
+          <div class="col-sm-4">
             <input class="form-control" id="add-link-name" type="string" placeholder="Enter name">
           </div>
         </div>
         <div class="form-group">
-          <label class="col-sm-3 control-label" for="add-link-url">Url</label>
-          <div class="col-sm-7">
+          <label class="col-sm-2 control-label" for="add-link-url">Url</label>
+          <div class="col-sm-10">
             <input class="form-control" id="add-link-url" type="string" placeholder="Enter url">
           </div>
         </div>
         <div class="form-group">
-          <label class="col-sm-3 control-label" for="add-link-category">Category</label>
-          <div class="col-sm-8">
+          <label class="col-sm-2 control-label" for="add-link-category">Category</label>
+          <div class="col-sm-8" id="select-category-container">
             <select class="form-control" id="add-link-category" placeholder="Enter category" style="display: inline-block;">
-              
             </select>
+          </div>
+          <div class="col-sm-2" id="add-category-container">
+            <button id="add-category-btn" class="btn btn-primary" type="button">+</button>
           </div>
         </div>
         <div>
-          <button id="add-link-btn" class="btn btn-primary" type="button">Save</button>
+          <button id="save-link-btn" class="btn btn-primary save-btn" type="button">Save</button>
         </div>
       </form>
+
+        <form id="add-category-form" class="form-horizontal" role="form" style="display: none;">
+            <a href="#" id="add-category-form-back">Back</a>
+            <div class="form-group">
+                <label class="col-sm-2 control-label" for="add-category-name">Name</label>
+                <div class="col-sm-4">
+                    <input class="form-control" id="add-category-name" type="string" placeholder="Enter name">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label" for="add-category-parent">Category</label>
+                <div class="col-sm-8" id="select-category-parent-container">
+                    <select class="form-control" id="add-category-parent" placeholder="Enter category" style="display: inline-block;">
+                    </select>
+                </div>
+            </div>
+            <div>
+                <button id="save-category-btn" class="btn btn-primary save-btn" type="button">Save</button>
+                <button type="button" class="btn btn-sm btn-default" tooltip="After today restriction">Min date</button>
+            </div>
+        </form>
   </div>
   </body>
 </html>

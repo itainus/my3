@@ -23,7 +23,7 @@ class TreeController < ApplicationController
     Rails.logger.info @tree.as_json(include: {categories: {only: [:id, :name, :category_id]}, links: {only: [:id, :url, :category_id, :name]}})
 
      # render json: @tree.as_json(include: {categories: {only: [:id, :name, :category_id]}, links: {only: [:id, :url, :category_id, :name]}})
-     render_tree
+    render_tree
   end
 
   def create_new_category
@@ -35,7 +35,7 @@ class TreeController < ApplicationController
 
     @tree.branch_category(category.id)
 
-    render_branches
+    render_tree
   end
 
   def add_category
@@ -44,7 +44,7 @@ class TreeController < ApplicationController
 
     @tree.branch_category(category_id)
 
-    render_branches
+    render_tree
   end
 
   def remove_category
@@ -57,7 +57,7 @@ class TreeController < ApplicationController
       Rails.logger.info "[DEBUG INFO] branch '#{branch_id}' dose not exists"
     end
 
-    render_branches
+    render_tree
   end
 
   def create_new_link
@@ -70,7 +70,7 @@ class TreeController < ApplicationController
 
     @tree.leaf_link(link, link_name)
 
-    render_leafs
+    render_tree
   end
 
   def add_link
@@ -92,13 +92,14 @@ class TreeController < ApplicationController
     leaf_id = params[:leaf_id]
     Rails.logger.info "[DEBUG INFO] ############## TreeController - remove_link - leaf_id = #{leaf_id} ##############"
 
-    if @tree.leafs.exists?(leaf_id)
-      @tree.leafs.destroy(leaf_id)
+    if @tree.leaf_exists(leaf_id)
+      # @tree.destroy_leaf(leaf_id)
+      Leaf.destroy(leaf_id)
     else
       Rails.logger.info "[DEBUG INFO] leaf '#{leaf_id}' dose not exists"
     end
 
-    render_leafs
+    render_tree
   end
 
   def update_link
@@ -108,14 +109,15 @@ class TreeController < ApplicationController
     link_category_id = params[:link_category_id]
     Rails.logger.info "[DEBUG INFO] ############## TreeController - update_link - leaf_id = #{leaf_id} - new link_name = #{link_name}, new link_url = #{link_url}, new link_category_id = #{link_category_id}##############"
 
-    if @tree.leafs.exists?(leaf_id)
+    if @tree.leaf_exists(leaf_id)
       link = Link.create_if_not_exists(link_url, link_category_id)
-      @tree.leafs.update(leaf_id, :name => link_name, :link_id => link.id)
+      branch = @tree.branches.where(:category_id => link_category_id).first
+      Leaf.update(leaf_id, :name => link_name, :branch_id => branch.id, :link_id => link.id)
     else
       Rails.logger.info "[DEBUG INFO] leaf '#{leaf_id}' dose not exists"
     end
 
-    render_leafs
+    render_tree
   end
 
   def suggest_branch
@@ -147,16 +149,16 @@ class TreeController < ApplicationController
             include: {
                 category: {
                     only: [:id, :name, :category_id]
+                },
+                leafs: {
+                    only: [:id, :name],
+                    include: {
+                        link: {
+                            only: [:id, :name, :url, :category_id]
+                        }
+                    }
                 }
-            }
-          },
-          leafs: {
-            only: [:id, :name],
-            include: {
-              link: {
-                only: [:id, :name, :url, :category_id]
-              }
-            }
+            },
           }
       })
     end
@@ -172,15 +174,15 @@ class TreeController < ApplicationController
       )
     end
 
-    def render_leafs
-      render json: @tree.leafs.as_json(
-        only: [:id, :name],
-        include: {
-          link: {
-            only: [:id, :url, :category_id]
-          }
-        }
-      )
-    end
+    # def render_leafs
+    #   render json: @tree.leafs.as_json(
+    #     only: [:id, :name],
+    #     include: {
+    #       link: {
+    #         only: [:id, :url, :category_id]
+    #       }
+    #     }
+    #   )
+    # end
 
 end
