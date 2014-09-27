@@ -3,7 +3,7 @@
 
   "name": "My3",
   "description": "My3 add link",
-  "version": "1.0",
+  "version": "1.1",
 
   "browser_action": {
     "default_icon": "tree.png",
@@ -12,7 +12,7 @@
   "permissions": [
     "tabs",
     "cookies",
-    "https://secure.flickr.com/",
+    "http://my-3.herokuapp.com/",
     "http://localhost:3000/"
   ]
 

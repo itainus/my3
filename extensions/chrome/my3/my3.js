@@ -11,7 +11,8 @@ function getCookie(cname) {
 }
 
 var My3 = {
-
+//    url: 'http://localhost:3000',
+    url: 'http://my-3.herokuapp.com',
     trees: null,
     treeIndex: 0,
 	treeID: 0,
@@ -76,7 +77,7 @@ var My3 = {
 			var tabTitle = tab.title;
 
 			$.ajax({
-		  		url: "http://localhost:3000/home/trees",
+		  		url: My3.url + "/home/trees",
 		  		context: document.body
 			}).done(function(t) {
 			
@@ -92,7 +93,7 @@ var My3 = {
 				$('#add-link-url').val(tabLink);
 
                 $.ajax({
-                    url: "http://localhost:3000/tree/" + My3.treeID + "/suggest_branch",
+                    url:  My3.url + "/tree/" + My3.treeID + "/suggest_branch",
                     context: document.body,
                     type: "GET",
                     data: {link_url: tabLink},
@@ -114,7 +115,7 @@ var My3 = {
 document.addEventListener('DOMContentLoaded', function () {
 
     var details = {
-        'url' : 'http://localhost:3000/',
+        'url' : My3.url,
         'name' : 'XSRF-TOKEN'
     };
 
@@ -137,7 +138,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 		$.ajax({
 			type: "POST",
-			url: "http://localhost:3000/tree/" + My3.treeID + "/link_create",
+			url:  My3.url + "/tree/" + My3.treeID + "/link_create",
 			data: data,
 			dataType: 'json',
 			success: function(response)
@@ -177,7 +178,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         $.ajax({
             type: "POST",
-            url: "http://localhost:3000/tree/" + My3.treeID + "/category_create",
+            url: My3.url + "/tree/" + My3.treeID + "/category_create",
             data: data,
             dataType: 'json',
             success: function(tree)
