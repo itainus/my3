@@ -1,7 +1,7 @@
 .col-lg-3
   %button#btn.btn.btn-sm.btn-primary{'ng-click'=>"sketch_tree()", "data-toggle"=>"tooltip", "data-placement"=>"bottom", :title=>'Draw Tree'}
     %i.fa.fa-random
-  %button#new-link-btn.btn.btn-sm.btn-primary{"data-target" => "#newLink", "data-toggle" => "modal", 'ng-click'=>"set_edit_link_fields(false)" , "data-toggle"=>"tooltip", "data-placement"=>"bottom", :title=>'Add Link'} New Link
+  %button#new-link-btn.btn.btn-sm.btn-primary{"data-target" => "#newLink", "data-toggle" => "modal", 'ng-click'=>"set_edit_link_fields(false)"} New Link
     %i.fa.fa-leaf
   %button#new-category-btn.btn.btn-sm.btn-primary{"data-target" => "#newCategory", "data-toggle" => "modal"} New Category
     %i.fa.fa-tag
