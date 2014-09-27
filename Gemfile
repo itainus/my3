@@ -56,7 +56,8 @@ gem 'nokogiri'
 
 gem 'haml'
 gem 'haml-rails'
-gem 'haml_coffee_assets'
+# gem 'haml_coffee_assets'
+gem 'haml_coffee_assets', git: "https://github.com/netzpirat/haml_coffee_assets"
 
 gem 'simple_form'
 
