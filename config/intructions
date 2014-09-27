@@ -8,7 +8,7 @@ rails generate devise:install
 
 rake db:create
 
-rails g devise user
+rails generate devise user
 
 rake db:migrate
 
