@@ -7,7 +7,7 @@ class CreateCategories < ActiveRecord::Migration
       t.timestamps
     end
 
-    Categories.create :name => "root", :category_id => NULL
+    # Categories.create :name => "root", :category_id => NULL
 
   end
 end
