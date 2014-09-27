@@ -13,6 +13,10 @@ Rails.application.routes.draw do
   get "home/friends" => "home#friends"
   post "home/tree" => "home#tree"
   get "home/test" => "home#test"
+  post "friends/add" => "friend#add_friend"
+  post "friends/delete" => "friend#delete_friend"
+
+
 
   get "tree/" => "tree#index"
   get "tree/:id" => "tree#index"
@@ -30,6 +34,8 @@ Rails.application.routes.draw do
   get "tree/:id/suggest_branch" => "tree#suggest_branch"
 
   get "friends" => "friend#index"
+  get "user/all" => "user#all_users"
+
 
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".

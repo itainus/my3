@@ -65,3 +65,5 @@ gem 'simple_form'
 gem 'bcrypt', '~> 3.1.2'
 
 gem 'ngmin-rails'
+
+gem 'rails_12factor'

@@ -1,9 +1,5 @@
 ctrls = angular.module('Mytree.controllers',[])
 
-ctrls.controller 'FriendsController',
-  ($scope, Services, TreeSketch)->
-    console.log('FriendsController')
-
 ctrls.controller 'MyController',
   ($scope, Services, TreeSketch)->
 
@@ -241,3 +237,35 @@ ctrls.controller 'MyController',
 #    $scope.component = 'tree'
     $scope.initialize()
 
+
+
+ctrls.controller 'FriendsController',
+  ($scope, Services)->
+    $scope.initialize = ()->
+      console.log('FriendsController')
+      Services.get_all_users().then (users)->
+        console.log(users)
+        $scope.users = users
+        Services.get_friends().then (friends)->
+          console.log(friends)
+          $scope.friends = friends
+
+    $scope.is_friend = (userID)->
+      if !$scope.friends
+        return false
+      for f in $scope.friends
+        if f.id == userID
+          return true
+      return false
+
+    $scope.add_friend = (userID)->
+      Services.add_friend(userID).then (friends)->
+        console.log(friends)
+        $scope.friends = friends
+
+    $scope.remove_friend = (userID)->
+      Services.delete_friend(userID).then (friends)->
+        $scope.friends = friends
+
+
+    $scope.initialize()

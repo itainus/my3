@@ -13,6 +13,10 @@ angular.module('Mytree.services', ['ngResource'])
       $http.post('/tree/' + tree_id + '/category_add', {category_id: category_id}).then (resp) ->
         return resp.data
 
+#    add_category: (categoryID) ->
+#      $http.post('/category/' + categoryID).then (resp) ->
+#        return resp.data
+
     delete_category: (tree_id, branch_id) ->
       $http.post('/tree/' + tree_id + '/category_remove', {branch_id: branch_id}).then (resp) ->
         return resp.data
@@ -33,11 +37,18 @@ angular.module('Mytree.services', ['ngResource'])
       $http.post('/tree/' + tree_id + '/link_add', {link_id: link_id, link_name: name}).then (resp) ->
         return resp.data
 
+    get_all_users: () ->
+      $http.get('/user/all').then (resp) ->
+        return resp.data
+
     get_friends: () ->
       $http.get('/home/friends').then (resp) ->
         return resp.data
 
+    add_friend: (user_id) ->
+      $http.post('/friends/add', {user_id: user_id}).then (resp) ->
+        return resp.data
 
-    add_category: (categoryID) ->
-      $http.post('/category/' + categoryID).then (resp) ->
+    delete_friend: (user_id) ->
+      $http.post('/friends/delete', {user_id: user_id}).then (resp) ->
         return resp.data

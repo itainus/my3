@@ -1,3 +1,23 @@
-%h1
-  %a{"href" => "#"}
-    Friends
+.row
+  .col-md-12{:style => "height: 370px; overflow:auto;"}
+    %table.table
+      %thead.capitalize
+        %tr{'ng-show' => "users"}
+          %th
+          %th
+          %th
+          -#%th.panel_topic.text-primary
+            email
+      %tbody
+        %tr{'ng-repeat' => "user in users"}
+          %td
+          %td.panel_topic{'ng-if' => 'is_friend(user.id)'}
+            %button.btn.btn-sm.btn-primary{'ng-click'=>"remove_friend(user.id)", :title => 'Remove friend'}
+              %i.fa.fa-trash-o
+          %td.panel_topic{'ng-if' => '!is_friend(user.id)'}
+            %button.btn.btn-sm.btn-primary{'ng-click'=>"add_friend(user.id)", :title => 'Add friend'}
+              %i.fa.fa-user
+          %td
+            -#{{user.id}}
+          %td
+            {{user.email}}

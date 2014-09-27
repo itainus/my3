@@ -10,8 +10,7 @@ class HomeController < ApplicationController
       current_user.trees.create_new(current_user.id, tree_name)
     end
 
-    # @tree = current_user.trees.first
-      @trees = current_user.trees
+    @trees = current_user.trees
   end
 
   def index
