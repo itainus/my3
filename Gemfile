@@ -4,8 +4,6 @@ ruby '2.1.2'
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '4.1.1'
 
-
-
 # Use sqlite3 as the database for Active Record
 # gem 'sqlite3'
 
@@ -32,7 +30,6 @@ gem 'sdoc', '~> 0.4.0',          group: :doc
 # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
 gem 'spring',        group: :development
 
-
 gem 'devise'
 
 gem 'angularjs-rails', '~> 1.2.22'
@@ -51,9 +48,7 @@ gem 'angularjs-rails', '~> 1.2.22'
 
 #########################
 
-
 gem 'nokogiri'
-
 
 gem 'haml'
 gem 'haml-rails'
@@ -66,8 +61,6 @@ gem 'bcrypt', '~> 3.1.2'
 
 gem 'ngmin-rails'
 
-
-
 group :production do
   # gem 'pg' # dont want sqlite in production
   # gem 'unicorn' # make sure you follow installation instructions for this gem
@@ -75,3 +68,7 @@ group :production do
   gem 'rails_log_stdout',           github: 'heroku/rails_log_stdout'
   gem 'rails3_serve_static_assets', github: 'heroku/rails3_serve_static_assets'
 end
+
+gem 'websocket-rails'
+
+gem "cancan"

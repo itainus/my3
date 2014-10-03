@@ -11,8 +11,9 @@ function getCookie(cname) {
 }
 
 var My3 = {
-//    url: 'http://localhost:3000',
-    url: 'http://my-3.herokuapp.com',
+    wsUrl:'ws://localhost:3000/websocket',
+    url: 'http://localhost:3000',
+//    url: 'http://my-3.herokuapp.com',
     trees: null,
     treeIndex: 0,
 	treeID: 0,
@@ -21,11 +22,11 @@ var My3 = {
 
 	addLinkCallback: function(e)
 	{
-		console.log ('my3 - addLinkCallback', e);
+		//console.log ('my3 - addLinkCallback', e);
 
 		var tree = JSON.parse(e.target.response);
 
-		console.log (tree);
+		//console.log (tree);
 
 		var div = document.createElement('div');
 		div.innerHTML = tree.name;
@@ -67,14 +68,48 @@ var My3 = {
         });
     },
 
-	addLink: function()
+	init: function()
 	{
-		console.log ('my3 - addLink');
+		console.log ('my3 - init');
+//
+//        var ws;
+//        if ("WebSocket" in window) {
+//            My3.ws = new WebSocket(My3.wsUrl);
+//            My3.ws.onopen = function() {
+//                My3.ws.send("hello");
+//            };
+//        }
+
+        My3.ws = new WebSocket(My3.wsUrl);
+
+        My3.ws.on_open = function(data) {
+            console.log("Connection has been established: " + data);
+        };
+
+        My3.ws.on_close = function(data) {
+            console.log("Connection has been closed: " + data);
+            My3.ws = new WebSocket(My3.wsUrl);
+        };
+
+//        var channel = My3.ws.subscribe('rsvp');
+//
+//        channel.bind('new',function(rsvp){
+//            console.log('subscribe rsvp');
+//            console.log(rsvp)
+//        });
+
+//        My3.ws.send("rsvp.new");
+
+
+        chrome.cookies.get({'url': My3.url, 'name': 'XSRF-TOKEN'}, function(cookie){
+             My3.xsrfToken = decodeURIComponent(cookie.value);
+        });
 
 		chrome.tabs.getSelected(null,function(tab) {
-			console.log(tab);
+			console.log('tab', tab);
 			var tabLink = tab.url;
 			var tabTitle = tab.title;
+            var favIconUrl = tab.favIconUrl;
 
 			$.ajax({
 		  		url: My3.url + "/home/trees",
@@ -91,6 +126,7 @@ var My3 = {
 				$('#tree-container').text(treeName);
 				$('#add-link-name').val(tabTitle);
 				$('#add-link-url').val(tabLink);
+                $('#add-link-img').val(favIconUrl);
 
                 $.ajax({
                     url:  My3.url + "/tree/" + My3.treeID + "/suggest_branch",
@@ -100,7 +136,7 @@ var My3 = {
                     dataType: 'json'
                 }).done(function(category) {
 
-                    console.log(category);
+                    console.log('suggest_category', category);
                     My3.suggestCategory = category;
 
                     My3.populateCategories();
@@ -114,26 +150,15 @@ var My3 = {
 
 document.addEventListener('DOMContentLoaded', function () {
 
-    var details = {
-        'url' : My3.url,
-        'name' : 'XSRF-TOKEN'
-    };
+    My3.init();
 
-    chrome.cookies.get(details, function(cookie){
-
-        console.log(cookie);
-
-        My3.xsrfToken = decodeURIComponent(cookie.value);
-    });
-
-    My3.addLink();
-
-	$( "#save-link-btn" ).click(function() {
+	$("#save-link-btn" ).click(function() {
 
 		var data = {
 			link_name: $('#add-link-name').val(),
 			link_url: $('#add-link-url').val(),
-			link_category_id: $('#add-link-category').val()
+			link_category_id: $('#add-link-category').val(),
+            link_img: $('#add-link-img').val()
 		};
 
 		$.ajax({
@@ -143,8 +168,16 @@ document.addEventListener('DOMContentLoaded', function () {
 			dataType: 'json',
 			success: function(response)
 			{
-				console.log(response);
+				//console.log(response);
 				//alert( "added!" );
+
+                var rsvp = {
+                    attending: true,
+                    user_id: 54321
+                };
+
+                My3.ws.send('rsvp');
+
                 window.close();
 			},
 			fail: function(e)
@@ -156,7 +189,6 @@ document.addEventListener('DOMContentLoaded', function () {
 	        }
 		});
 	});
-
 
     $('#add-category-form-back').click(function(e) {
         e.stopPropagation();
@@ -183,7 +215,7 @@ document.addEventListener('DOMContentLoaded', function () {
             dataType: 'json',
             success: function(tree)
             {
-                console.log(tree);
+                //console.log(tree);
                 My3.trees[My3.treeIndex] = tree;
                 My3.populateCategories();
 

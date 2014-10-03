@@ -12,13 +12,19 @@
 //
 
 //= require jquery
-//= require jquery_ujs
+
+//= require jquery-ui.js
 //= require angular
 //= require angular-route
 //= require angular-resource
 //= require turbolinks
 //= require hamlcoffee
 //= require bootstrap_load
+
+//= require jquery.notify.js
+//= require websocket_rails/main
 //= require mytree_app
 //= require controllers
 //= require_tree .
+
+

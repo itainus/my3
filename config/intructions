@@ -27,3 +27,11 @@ rails destroy model Friend
 rake db:migrate:down VERSION=20140828193020
 
 gem install angularjs-rail
+
+rails g websocket_rails:install
+
+https://github.com/websocket-rails/websocket-rails/wiki/Installation-and-Setup
+
+ws - ["rsvp.new",{"id":129690,"data":{"attending":true,"user_id":543210}}]
+
+rails g cancan:ability

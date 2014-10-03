@@ -9,12 +9,13 @@
     %meta{:content => "", :name => "description"}
     %meta{:content => "", :name => "author"}
     %link{:href=>"//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css", :rel=>"stylesheet"}
+    -#%link{:href=>"//getbootstrap.com/dist/css/bootstrap.min.css", :rel=>"stylesheet"}
     = stylesheet_link_tag "application", :media => "all"
     = yield(:head)
   %body
     .navbar.navbar-inverse.navbar-fixed-top
       %a.navbar-left{:href=>"#", :style=>"padding:5px;"}
-        %img{:src=>"images/tree-white.png", :title=>"My3", :style=>"width:42px;height:42px;border:0"}
+        %img{:src=>"/images/tree-white.png", :title=>"My3", :style=>"width:42px;height:42px;border:0"}
       %a.navbar-right{:href=>"downloads/extension/chrome/my3-extension.zip", :style=>"float: right !important;"}
         %i.fa.fa-puzzle-piece
       .container
@@ -37,6 +38,16 @@
         .collapse.navbar-collapse 
           %ul.nav.navbar-nav.navbar-right.capitalize
     .container{style:"padding-top:45px" , id:"main-container"}
+      #notifications-container{:style=>"display:none"}
+        #sticky
+          %a.ui-notify-close.ui-notify-cross{:href=>"#"}
+            x
+          %h1
+            :plain
+              \#{title}
+          %p
+            :plain
+              \#{text}
       .content
         .container
           %div{"data-ng-view"=>"mytree"}

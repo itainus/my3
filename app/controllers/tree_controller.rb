@@ -64,11 +64,32 @@ class TreeController < ApplicationController
     link_name = params[:link_name]
     link_url = params[:link_url]
     link_category_id = params[:link_category_id]
+    link_img = params[:link_img]
     Rails.logger.info "[DEBUG INFO] ############## TreeController - create_new_link - link_name = #{link_name}, link_url = #{link_url}, link_category_id = #{link_category_id} ##############"
+    # ix =open('http://cdn.sstatic.net/stackoverflow/img/favicon.ico')
+    #  ii = open('http://cdn.sstatic.net/stackoverflow/img/favicon.ico', &:read)
+    # ii = Base64.encode64(open('http://cdn.sstatic.net/stackoverflow/img/favicon.ico'){ |io| io.read })
+    # ii = ActiveSupport::Base64.encode64(open(link_img) { |io| io.read })
+    # Rails.logger.info ii
+    # Rails.logger.info ii.as_json
+    # Rails.logger.info "[DEBUG INFO] ############## TreeController - create_new_link - end ##############"
+
+
+    rsvp_update = {
+        :yes => @rsvp_yes_count,
+        :no => @rsvp_no_count,
+        :user_id => 12345
+    }
+    WebsocketRails[:rsvp].trigger 'new', rsvp_update
 
     link = Link.create_if_not_exists(link_url, link_category_id)
 
+    # linkImg = Base64.encode64(open(link_img){ |io| io.read })
+    # src="data:image/png;base64,AAABA...."
+    
     @tree.leaf_link(link, link_name)
+
+
 
     render_tree
   end

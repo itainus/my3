@@ -34,13 +34,21 @@ ctrls.controller 'MyController',
       $scope.myTree = tree
       $scope.sketch_tree()
 
-    $scope.sketch_tree = (filter)->
+    $scope.sketch_tree = (filter, root_category_id, root_angle)->
       branches = $scope.tree.branches
       leafs = []
       for b in branches
         for l in b.leafs
           leafs.push(l)
-      TreeSketch.drawTree(branches, leafs, filter)
+
+      t = {}
+      t.branches = branches
+      t.leafs = leafs
+      t.root_category_id = if root_category_id then root_category_id else 1
+      t.root_angle = if root_angle then root_angle else 90
+      t.filter = !!filter
+
+      TreeSketch.drawTree(t)
 
     $scope.save_category = ()->
       Services.create_category($scope.tree.id, $scope.categoryName, $scope.categoryParentID).then (tree)->
@@ -155,6 +163,12 @@ ctrls.controller 'MyController',
             return leaf
       return null
 
+    $scope.get_branch_by_id = (id) ->
+      for branch in $scope.tree.branches
+          if (branch.id == id)
+            return branch
+      return null
+
     $scope.tree_stats = (action)->
       statType =  $('#tree-canvas-stats-menu').attr('data-stats-type')
       statID =  $('#tree-canvas-stats-menu').attr('data-stats-id') * 1
@@ -169,10 +183,11 @@ ctrls.controller 'MyController',
           null
         if (action == 'edit')
           $scope.set_edit_link_fields(leaf)
-          angular.element('#newLink').modal('show');
+          angular.element('#editLink').modal('show');
         if (action == 'delete')
           $scope.delete_link(statID)
       if (statType == 'branch')
+        branch = $scope.get_branch_by_id(statID)
         if (action == 'add')
           $scope.add_category_to_mytree(statID)
         if (action == 'follow')
@@ -181,18 +196,11 @@ ctrls.controller 'MyController',
           $scope.edit_category(statID)
         if (action == 'delete')
           $scope.delete_category(statID)
+        if (action == 'zoom')
+          console.log(branch)
+          $scope.sketch_tree(false, branch.category.id, branch.angle)
 
 
-
-
-    $scope.setActive = (el) ->
-      console.log('setActive', el)
-
-    $scope.setViewComponent = (component) ->
-      return false
-      $scope.component = component
-      console.log('setViewComponent')
-      return false
 
     $scope.filter_tree = (el) ->
       console.log(el)
@@ -267,5 +275,63 @@ ctrls.controller 'FriendsController',
       Services.delete_friend(userID).then (friends)->
         $scope.friends = friends
 
+    $scope.create_notification = (template, vars, opts)->
+      $("#notifications-container").notify("create", template, vars, opts);
+
+    $scope.init_websocket = ()->
+      if $scope.websocket_dispatcher
+        return
+      websocket_endpoint = 'localhost:3000/websocket'
+      $scope.websocket_dispatcher = new WebSocketRails(websocket_endpoint)
+
+      $scope.websocket_dispatcher.on_open = (data) ->
+        console.log "Connection has been established: #{data}"
+
+      $scope.websocket_dispatcher.on_close = (data) ->
+        console.log "Connection has been closed: #{data}"
+        window.websocket_dispatcher = new WebSocketRails(websocket_endpoint)
+
+      channel = $scope.websocket_dispatcher.subscribe 'rsvp'
+      channel.bind 'new', (rsvp) =>
+        console.log('subscribe rsvp')
+        console.log(rsvp)
+        $("#notifications-container").notify()
+        $scope.create_notification("sticky", { title:'Default Notification', text:'Example of a default notification.  I will not fade out after 5 seconds'},{ expires:false });
+
+      private_channel = $scope.websocket_dispatcher.subscribe 'tree'
+      private_channel.bind 'update', (response) =>
+        console.log('tree update response')
+        console.log(response)
+        $("#notifications-container").notify()
+        $scope.create_notification("sticky", { title:'Default Notification', text:'Example of a default notification.  I will not fade out after 5 seconds'},{ expires:false });
+
+      private_channel.on_success = (current_user) =>
+        console.log( current_user.name + "Has joined the channel");
+        console.log current_user
+
+      private_channel.on_failure = (reason) =>
+        console.log( "Authorization failed because " + reason.message );
+        console.log reason
+
+      $scope.websocket_dispatcher.bind 'tree.update', (response) =>
+        console.log response
+        $("#notifications-container").notify()
+        $scope.create_notification("sticky", { title:'Default Notification', text:'Example of a default notification.  I will not fade out after 5 seconds'},{ expires:false });
+
+
+    $scope.try_websocket = ()->
+      rsvp =
+        attending: true
+        user_id: 54321
+      $scope.websocket_dispatcher.trigger 'rsvp.new',rsvp
+
+    $scope.try_private_websocket = ()->
+      leaf = {
+        id: 12345
+        name: 'new-leaf-name'
+      }
+      $scope.websocket_dispatcher.trigger 'tree.update',leaf
+
 
     $scope.initialize()
+    $scope.init_websocket()

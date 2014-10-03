@@ -36,6 +36,12 @@ Rails.application.routes.draw do
   get "friends" => "friend#index"
   get "user/all" => "user#all_users"
 
+  get 'notifications' => 'notifications#index'
+  get 'notifications/admin' => 'notifications#admin'
+  get 'notifications/connect' => 'notifications#connect'
+  post 'notifications/push' => 'notifications#push'
+
+  # get 'notifications/rsvp', 'notifications#rsvp'
 
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
