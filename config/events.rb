@@ -21,12 +21,12 @@ WebsocketRails::EventMap.describe do
     subscribe :subscribe_private, :to => NotificationsController, :with_method => :authorize_channels
   end
 
-  namespace :rsvp do
-    subscribe :new, :to => NotificationsController, :with_method => :rsvp
-  end
-
   namespace :tree do
     subscribe :update, :to => NotificationsController, :with_method => :tree_update
+  end
+
+  namespace :friend do
+   subscribe :status, :to => NotificationsController, :with_method => :friend_status
   end
 
 end

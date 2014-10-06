@@ -35,3 +35,7 @@ https://github.com/websocket-rails/websocket-rails/wiki/Installation-and-Setup
 ws - ["rsvp.new",{"id":129690,"data":{"attending":true,"user_id":543210}}]
 
 rails g cancan:ability
+
+rails generate migration add_branch_id_to_branches branch:references
+
+rake db:rollback STEP=1

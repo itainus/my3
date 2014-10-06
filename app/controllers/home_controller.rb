@@ -67,6 +67,14 @@ class HomeController < ApplicationController
                     only: [:id, :name, :url, :category_id]
                 }
               }
+            },
+            branches: {
+              only: [:id, :name]
+              # ,include: {
+              #   branches: {
+              #       only: [:id]
+              #   }
+              # }
             }
           }
         }

@@ -18,22 +18,25 @@ class Tree < ActiveRecord::Base
     return tree
   end
 
+
   def branch_category(category_id)
     Rails.logger.info "[DEBUG INFO] ############## Tree - branch_category - category_id = #{category_id} ##############"
 
-    category = Category.find(category_id)
-    original_category_id = category_id
-    if category.present?
-      while !self.branches.exists?(:category_id => category_id)
-        Rails.logger.info "[DEBUG INFO] adding branch (category_id = #{category_id})"
-        self.branches.create(:tree_id => self.id, :category_id => category_id)
-        category_id = category.category_id
-      end
+    branch = self.branches.where(:category_id => category_id).first
 
-      self.branches.where(:category_id => original_category_id).first
-    else
-      Rails.logger.info "[DEBUG INFO] category '#{category_id}' dose not exists"
+    if branch.blank?
+      category = Category.find(category_id)
+      if category.present?
+        branch = self.branch_category(category.category_id)
+        if branch.id
+          branch = self.branches.create(:tree_id => self.id, :category_id => category_id, :branch_id => branch.id)
+        end
+      else
+        Rails.logger.info "[DEBUG INFO] category '#{category_id}' dose not exists"
+      end
     end
+
+    branch
   end
 
   def leaf_exists(leaf_id)

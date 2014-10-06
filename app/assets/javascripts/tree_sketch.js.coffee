@@ -18,8 +18,8 @@ angular.module('Mytree.treeSketch', ['ngResource'])
     t = 0
     radius = 5
     m_children = []
-    m_branches = []
-    m_leafs = []
+    m_branches = {}
+    m_leafs = {}
 
 
     getMouse: (e, c) ->
@@ -27,7 +27,6 @@ angular.module('Mytree.treeSketch', ['ngResource'])
       offsetX = 0
       offsetY = 0
 
-#    // Compute the total offset. It's possible to cache this if you want
       if (element.offsetParent != undefined)
         offsetY += element.offsetTop
         offsetX += element.offsetLeft
@@ -35,8 +34,6 @@ angular.module('Mytree.treeSketch', ['ngResource'])
         while (element = element.offsetParent)
           offsetY += element.offsetTop
           offsetX += element.offsetLeft
-
-#is part is not strictly necessary, it depends on your styling
 
       mx = e.pageX - offsetX;
       my = e.pageY - offsetY;
@@ -53,15 +50,16 @@ angular.module('Mytree.treeSketch', ['ngResource'])
       $('#tip-canvas').removeClass('open')
 
     getLeafByPoint: (x, y) ->
-      for l in m_leafs
-        dx = x - l.x
-        dy = y - l.y
+      for k,l of m_leafs
+        dx = x - l.ep.x
+        dy = y - (H - l.ep.y)
         if (dx * dx + dy * dy <= radius * radius)
           return l
       return null
 
     getBranchByPoint: (x, y) ->
-      for b in m_branches
+#      for b in m_branches
+      for k,b of m_branches
         spx = b.spX;
         spy = b.spY
         epx = b.epX
@@ -107,7 +105,9 @@ angular.module('Mytree.treeSketch', ['ngResource'])
 
       e.stopPropagation()
 
+      console.log 'leaf-click', pt.x, pt.y
       l = t.getLeafByPoint(pt.x, pt.y)
+
       if l
         $('#tree-canvas-stats-zoom').hide()
         name = l.name
@@ -139,10 +139,9 @@ angular.module('Mytree.treeSketch', ['ngResource'])
 
     onCanvasHover: (e) ->
       pt = t.getMouse(e, canvas);
-
       l = t.getLeafByPoint(pt.x, pt.y)
       if l
-        t.showTooltip(l.x + 8, l.y - 7, '[' + l.id + '][' + l.link.id + '] ' + l.name)
+        t.showTooltip(l.ep.x + 8, H - l.ep.y - 7, '[' + l.id + '][' + l.link.id + '] ' + l.name)
         return
 
       b = t.getBranchByPoint(pt.x, pt.y)
@@ -151,6 +150,7 @@ angular.module('Mytree.treeSketch', ['ngResource'])
         return
 
       $('#tip-canvas').fadeOut()
+      return
 
 
     drawTree: (tree) ->
@@ -165,11 +165,6 @@ angular.module('Mytree.treeSketch', ['ngResource'])
       t = this
 #      t.filter = !!filter
       canvas = document.getElementById("tree-canvas");
-
-#      if (!canvas)
-#        alert('xanvas')
-#        return
-
       tipCanvas = document.getElementById("tip-canvas");
 
       $('#tree-canvas').unbind('mousemove');
@@ -189,35 +184,40 @@ angular.module('Mytree.treeSketch', ['ngResource'])
       canvas.height = H;
 
       m_children = []
-      m_leafs = []
+      m_leafs = {}
       m_links = []
-      m_branches = []
+      m_branches = {}
       m_categories = []
 
 
       for b in branches
-        m_branches.push(b)
-        b.category.id *= 1
-        b.category.category_id *= 1
+#        m_branches.push(b)
+        m_branches[b.id] = b
+#        b.category.id *= 1
+#        b.category.category_id *= 1
+#
+#        if (!b.category.category_id)
+#          continue
 
-        if (!b.category.category_id)
-          continue
-
-        if (m_children[b.category.category_id])
-          m_children[b.category.category_id] += 1
-        else
-          m_children[b.category.category_id] = 1
-
-      for l in leafs
-        m_leafs.push(l)
-        l.link.id *= 1
-        l.link.category_id *= 1
-        if (m_children[l.link.category_id])
-          m_children[l.link.category_id] += 1
-        else
-          m_children[l.link.category_id] = 1
+#        if (m_children[b.category.category_id])
+#          m_children[b.category.category_id] += 1
+#        else
+#          m_children[b.category.category_id] = 1
+#
+#      for l in leafs
+#        m_leafs.push(l)
+#        l.link.id *= 1
+#        l.link.category_id *= 1
+#        if (m_children[l.link.category_id])
+#          m_children[l.link.category_id] += 1
+#        else
+#          m_children[l.link.category_id] = 1
 
       trunk = {x: W/2, y: 200, angle: 180 - tree.root_angle, id: tree.root_category_id};
+
+#      m_branches[trunk.id] = trunk
+
+      console.log(m_branches)
 
       t.init(trunk)
 
@@ -237,11 +237,8 @@ angular.module('Mytree.treeSketch', ['ngResource'])
       #width of the branch/trunk
       line_width = 10;
 
-#This is the end point of the trunk, from where branches will diverge
-
-#It becomes the start point for branches
-      start_points = []; #empty the start points on every init();
-
+      #empty the start points on every init();
+      start_points = [];
 
       ep = t.get_endpoint(trunk.x, H-trunk.y, trunk.angle, length);
 
@@ -252,8 +249,6 @@ angular.module('Mytree.treeSketch', ['ngResource'])
       trunk.epX = ep.x
       trunk.epY = H-ep.y
 
-      start_points.push(trunk);
-
       ctx.beginPath();
       ctx.moveTo(ep.x, H-50);
       ctx.lineTo(trunk.x, H-trunk.y);
@@ -262,9 +257,9 @@ angular.module('Mytree.treeSketch', ['ngResource'])
       ctx.lineWidth = line_width;
       ctx.stroke();
 
+      start_points.push(trunk);
       return t.branches();
 
-    #Lets draw the branches now
     branches: () ->
       length = length * reduction;
       line_width = line_width * reduction;
@@ -278,94 +273,77 @@ angular.module('Mytree.treeSketch', ['ngResource'])
         ctx.fillStyle = 'brown';
         ctx.strokeStyle = "brown";
 
-        nBranches = m_children[sp.id]
+        parent_branch = m_branches[sp.id]
+        branches = parent_branch.branches
+        for b in branches
+          branch = m_branches[b.id]
+          width = line_width * Math.round(50 + Math.random() * 20) / 100;
+          angle = Math.round((180 / (branches.length + 1)) * (i++) + ((Math.random() * 10) - 5))
+          if (branches.length == 1)
+            angle = 75
+          if angle < 95 && angle > 85
+            angle = 95
 
-        for b in m_branches
-          if (b.category.id == sp.id)
-            bParent = b
-            break
+          ep = t.get_endpoint(sp.x, sp.y, angle, length);
+          ep.id = branch.id
 
-        for b in m_branches
-          if ((b.category.category_id == sp.id)) #&& (b.category.id != sp.id))
+          branch.len = length;
+          branch.width = width
+          branch.angle = angle
+          branch.spX = sp.x
+          branch.spY = H - sp.y
+          branch.epX = ep.x
+          branch.epY = H - ep.y
 
-#            if (bParent.angle)
-#              bParentAngle = bParent.angle
-#            else
-#              bParentAngle = 0
-#            console.log(bParent.category.name, bParentAngle)
+          console.log 'branch', branch.id , branch.category.name + ' - angle = ' + branch.angle + ' - width = ' + branch.width + ' - from ('  + branch.spX + ',' + branch.spY  + ') to (' + branch.epX + ',' + branch.epY+')'
 
-            angle = Math.round((180 / (nBranches + 1)) * (i++) + ((Math.random() * 10) - 5))
+          if (!t.filter || branch.keep)
+            ctx.lineWidth = width;
+            ctx.moveTo(sp.x, H - sp.y);
+            ctx.lineTo(ep.x, H - ep.y);
+            ctx.stroke();
 
-#            angle -= bParentAngle
+            j = 0
+            leafs = branch.leafs
+            for leaf in leafs
+              ++j
+              leaf_branch_length = if branch.branches.length == 0 then length else (length / (leafs.length + 1) * j)
+              leaf_length = length * 0.25
+              leaf_angle = if branch.branches.length == 0 then (Math.round((180 / (leafs.length + 1)) * j + ((Math.random() * 10) - 5))) else if j%2 then branch.angle - 30 else branch.angle + 30
+              leaf_sp = t.get_endpoint(sp.x, sp.y, branch.angle, leaf_branch_length)
+              leaf_ep = t.get_endpoint(leaf_sp.x, leaf_sp.y, leaf_angle, leaf_length)
 
-            ep = t.get_endpoint(sp.x, sp.y, angle, length);
-            ep.id = b.category.id
+              leaf.sp = leaf_sp
+              leaf.ep = leaf_ep
 
-            lw = line_width * Math.round(50 + Math.random()*20)/100;
+              console.log 'leaf', leaf.id , leaf.name + ' - angle = ' + leaf_angle + ' - from ('  + leaf.sp.x + ',' + (H - leaf.sp.y)  + ') to (' + leaf.ep.x + ',' + (H - leaf.ep.y) + ')'
 
+              if (!t.filter || leaf.keep)
+                m_leafs[leaf.id] = leaf
+                img = new Image();
+                img.src = 'http://g.etfv.co/' + leaf.link.url
+                img.leaf = leaf
+                img.onload = () ->
+                  ctx.beginPath();
+                  ctx.fillStyle = 'lightgreen';
+                  ctx.strokeStyle = "green";
+                  ctx.lineWidth = 1
+                  ctx.moveTo(this.leaf.sp.x, H - this.leaf.sp.y);
+                  ctx.lineTo(this.leaf.ep.x, H - this.leaf.ep.y);
+                  ctx.drawImage(this, this.leaf.ep.x - 8, H - this.leaf.ep.y - 8, 16, 16);
+                  ctx.stroke();
 
-            b.len = length;
-            b.width = lw
-            b.angle = angle
-            b.spX = sp.x
-            b.spY = H-sp.y
-            b.epX = ep.x
-            b.epY = H-ep.y
+          new_start_points.push(ep);
 
-            mmm = b.category.name + ' - angle = ' + b.angle + ' - width = ' + b.width + ' - from ('  + b.spX + ',' + b.spY  + ') to (' + b.epX + ',' + b.epY+')'
-            console.log(mmm)
-
-            if (!t.filter || b.keep)
-              ctx.lineWidth = lw;
-              ctx.moveTo(sp.x, H-sp.y);
-              ctx.lineTo(ep.x, H-ep.y);
-              ctx.stroke();
-
-            new_start_points.push(ep);
-
-        ctx.stroke();
-
-        for l in m_leafs
-          if l.link.category_id == sp.id
-
-            angle = Math.round((180 / (nBranches + 1)) * (i++) + ((Math.random() * 10) - 5))
-            ep = t.get_endpoint(sp.x, sp.y, angle, length * reduction);
-
-            l.x = ep.x
-            l.y = H - ep.y
-
-            if (!t.filter || l.keep)
-              ctx.beginPath();
-              ctx.fillStyle = 'lightgreen';
-              ctx.strokeStyle = "green";
-              ctx.lineWidth = 1
-              ctx.moveTo(sp.x, H - sp.y);
-              ctx.lineTo(ep.x, H - ep.y);
-              ctx.stroke();
-              img = new Image();
-              img.src = 'https://fbstatic-a.akamaihd.net/rsrc.php/yl/r/H3nktOa7ZMg.ico'
-              img.src = 'http://www.google.com/s2/favicons?domain=' + l.link.url
-              img.src = 'http://g.etfv.co/' + l.link.url
-              img.leaf = l
-              img.onload = () ->
-                ctx.drawImage(this, this.leaf.x - 8, this.leaf.y - 8, 16, 16);
-                ctx.stroke();
-
-#            ctx.beginPath();
-#            ctx.arc(l.x, l.y, radius, 0, 2 * Math.PI, false);
-#            ctx.fill();
-#            ctx.stroke();
-#            debugger;
-
+      ctx.stroke();
 
       start_points = new_start_points;
 
       if (new_start_points.length)
         setTimeout(t.branches, 50);
-
+      return
 
     get_endpoint: (x, y, a, length) ->
       epx = x + length * Math.cos(a*Math.PI/180);
       epy = y + length * Math.sin(a*Math.PI/180);
-
       return {x: epx, y: epy};

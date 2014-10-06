@@ -44,7 +44,7 @@ ctrls.controller 'MyController',
       t = {}
       t.branches = branches
       t.leafs = leafs
-      t.root_category_id = if root_category_id then root_category_id else 1
+      t.root_category_id = if root_category_id then root_category_id else 13
       t.root_angle = if root_angle then root_angle else 90
       t.filter = !!filter
 
@@ -189,7 +189,7 @@ ctrls.controller 'MyController',
       if (statType == 'branch')
         branch = $scope.get_branch_by_id(statID)
         if (action == 'add')
-          $scope.add_category_to_mytree(statID)
+          $scope.add_category_to_mytree(branch.category.id)
         if (action == 'follow')
           null
         if (action == 'edit')
@@ -252,10 +252,10 @@ ctrls.controller 'FriendsController',
     $scope.initialize = ()->
       console.log('FriendsController')
       Services.get_all_users().then (users)->
-        console.log(users)
+#        console.log(users)
         $scope.users = users
         Services.get_friends().then (friends)->
-          console.log(friends)
+#          console.log(friends)
           $scope.friends = friends
 
     $scope.is_friend = (userID)->
@@ -275,6 +275,9 @@ ctrls.controller 'FriendsController',
       Services.delete_friend(userID).then (friends)->
         $scope.friends = friends
 
+
+
+
     $scope.create_notification = (template, vars, opts)->
       $("#notifications-container").notify("create", template, vars, opts);
 
@@ -283,47 +286,54 @@ ctrls.controller 'FriendsController',
         return
       websocket_endpoint = 'localhost:3000/websocket'
       $scope.websocket_dispatcher = new WebSocketRails(websocket_endpoint)
-
       $scope.websocket_dispatcher.on_open = (data) ->
-        console.log "Connection has been established: #{data}"
-
+        console.log "Connection has been established:", data
       $scope.websocket_dispatcher.on_close = (data) ->
-        console.log "Connection has been closed: #{data}"
+        console.log "Connection has been closed: ", data
         window.websocket_dispatcher = new WebSocketRails(websocket_endpoint)
 
-      channel = $scope.websocket_dispatcher.subscribe 'rsvp'
-      channel.bind 'new', (rsvp) =>
-        console.log('subscribe rsvp')
-        console.log(rsvp)
-        $("#notifications-container").notify()
-        $scope.create_notification("sticky", { title:'Default Notification', text:'Example of a default notification.  I will not fade out after 5 seconds'},{ expires:false });
-
-      private_channel = $scope.websocket_dispatcher.subscribe 'tree'
-      private_channel.bind 'update', (response) =>
-        console.log('tree update response')
-        console.log(response)
-        $("#notifications-container").notify()
-        $scope.create_notification("sticky", { title:'Default Notification', text:'Example of a default notification.  I will not fade out after 5 seconds'},{ expires:false });
-
-      private_channel.on_success = (current_user) =>
-        console.log( current_user.name + "Has joined the channel");
-        console.log current_user
-
-      private_channel.on_failure = (reason) =>
-        console.log( "Authorization failed because " + reason.message );
-        console.log reason
 
       $scope.websocket_dispatcher.bind 'tree.update', (response) =>
-        console.log response
+        console.log 'tree.update bind response:', response
+        $("#notifications-container").notify()
+        $scope.create_notification("sticky", { title:'tree.update', text:'Example of a default notification.  I will not fade out after 5 seconds'},{ expires:false });
+
+      $scope.websocket_dispatcher.bind 'friend.status', (response) =>
+        console.log 'friend.status bind response:', response
+        $("#notifications-container").notify()
+        text = response.friend + ' just ' + response.action + ' you'
+        $scope.create_notification("sticky", { title:'friend.status changed', text:text},{ expires:false });
+
+
+      private_channel = $scope.websocket_dispatcher.subscribe_private 'tree'
+      private_channel.on_success = (current_user) =>
+        console.log( current_user.email + " Has joined the channel");
+      private_channel.on_failure = (reason) =>
+        console.log "Authorization failed" , reason;
+      private_channel.bind 'update', (response) =>
+        console.log 'tree.update subscribe_private channel response:', response
         $("#notifications-container").notify()
         $scope.create_notification("sticky", { title:'Default Notification', text:'Example of a default notification.  I will not fade out after 5 seconds'},{ expires:false });
+
+      private_channel2 = $scope.websocket_dispatcher.subscribe_private 'friend'
+      private_channel2.on_success = (current_user) =>
+        console.log( current_user.email + " Has joined the channel");
+      private_channel2.on_failure = (reason) =>
+        console.log "Authorization failed" , reason;
+      private_channel2.bind 'status', (response) =>
+        console.log 'friend.status subscribe_private channel response:', response
+        $("#notifications-container").notify()
+        $scope.create_notification("sticky", { title:'friend.status', text:'Example of a default notification.  I will not fade out after 5 seconds'},{ expires:false });
+
+
 
 
     $scope.try_websocket = ()->
-      rsvp =
-        attending: true
-        user_id: 54321
-      $scope.websocket_dispatcher.trigger 'rsvp.new',rsvp
+      msg = {
+        friend_id : 4,
+        action : 'remove'
+      }
+      $scope.websocket_dispatcher.trigger 'friend.status', msg
 
     $scope.try_private_websocket = ()->
       leaf = {

@@ -4,4 +4,7 @@ class Branch < ActiveRecord::Base
 
   has_many :leafs, :dependent => :destroy
   has_many :links, :through => :leafs
+
+  belongs_to :branch
+  has_many :branches
 end

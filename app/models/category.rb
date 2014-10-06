@@ -1,6 +1,6 @@
 class Category < ActiveRecord::Base
   belongs_to :category
-  has_many :category
+  has_many :categories
   has_many :branches, :dependent => :destroy
   has_many :trees, :through => :branches
   has_many :links

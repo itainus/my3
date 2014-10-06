@@ -24,7 +24,31 @@ class FriendController < ApplicationController
     else
       Rails.logger.info "[DEBUG INFO] ############## FriendController - add_friend - adding friend #{friend_id} ##############"
       # current_user.friends.create(:id => friend_id)
-      Friendship.create(:user_id => current_user.id, :friend_id => friend_id)
+      # Friendship.create(:user_id => current_user.id, :friend_id => friend_id)
+
+      # msg = {
+      #     :friend_id => friend_id,
+      #     :action => 'add'
+      # }
+      #
+      # Rails.logger.info No.controller_name
+      #
+      # WebsocketRails.send_message :status,{} , :namespace => :friend
+      #
+      # if controller_store[friend_id].present?
+      #   Rails.logger.info "[DEBUG INFO] connection of user_id = #{friend_id} exists"
+      #   response = {:friend => current_user[:email], :action => 'add'}
+      #   connection = controller_store[friend_id]
+      #   connection.send_message :status,response , :namespace => :friend
+      # else
+      #   Rails.logger.info "[DEBUG INFO] no connection of user_id = #{friend_id} exists"
+      # end
+
+       Rails.logger.info "[DEBUG INFO] ws_connection s"
+      Rails.logger.info NotificationsController.number_of_foos.as_json
+      # Rails.logger.info current_user[:ws_connection]
+      Rails.logger.info "[DEBUG INFO] ws_connection e"
+
     end
 
     render_friends

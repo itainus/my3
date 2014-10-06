@@ -4,8 +4,7 @@ class Ability
   def initialize(user)
 
     Rails.logger.info "[DEBUG INFO] ############## Ability - initialize ##########"
-    Rails.logger.info user.as_json
-    Rails.logger.info :params.as_json
+    # Rails.logger.info user.as_json
 
     can :subscribe, :all
     # Define abilities for the passed in user here. For example:

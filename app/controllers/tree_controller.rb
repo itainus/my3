@@ -74,14 +74,6 @@ class TreeController < ApplicationController
     # Rails.logger.info ii.as_json
     # Rails.logger.info "[DEBUG INFO] ############## TreeController - create_new_link - end ##############"
 
-
-    rsvp_update = {
-        :yes => @rsvp_yes_count,
-        :no => @rsvp_no_count,
-        :user_id => 12345
-    }
-    WebsocketRails[:rsvp].trigger 'new', rsvp_update
-
     link = Link.create_if_not_exists(link_url, link_category_id)
 
     # linkImg = Base64.encode64(open(link_img){ |io| io.read })
