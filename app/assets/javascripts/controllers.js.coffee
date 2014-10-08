@@ -5,14 +5,12 @@ ctrls.controller 'MyController',
 
     $scope.initialize = ()->
 
-#      $location.path('edit')
-#      $('#tip-canvas').tooltip()
-#      $('#btn').tooltip()
+      console.log ("initialize")
+
       $('#btn').tooltip();
       $('#new-link-btn').tooltip();
 
 
-      console.log ("initialize")
       $scope.tree = {}
       $scope.friends = []
       $scope.set_tree()
@@ -34,21 +32,18 @@ ctrls.controller 'MyController',
       $scope.myTree = tree
       $scope.sketch_tree()
 
-    $scope.sketch_tree = (filter, root_category_id, root_angle)->
+    $scope.sketch_tree = (filter, trunk)->
       branches = $scope.tree.branches
-      leafs = []
-      for b in branches
-        for l in b.leafs
-          leafs.push(l)
 
-      t = {}
-      t.branches = branches
-      t.leafs = leafs
-      t.root_category_id = if root_category_id then root_category_id else 13
-      t.root_angle = if root_angle then root_angle else 90
-      t.filter = !!filter
+      tree = {}
+      tree.branches = branches
+      tree.trunk = if trunk then trunk else $scope.get_branch_by_category_id(1);
+      tree.trunk.angle = if trunk then trunk.angle else 90
+#      tree.trunk.len = if trunk then trunk.len else 250
 
-      TreeSketch.drawTree(t)
+      tree.filter = !!filter
+
+      return TreeSketch.drawTree(tree)
 
     $scope.save_category = ()->
       Services.create_category($scope.tree.id, $scope.categoryName, $scope.categoryParentID).then (tree)->
@@ -85,17 +80,6 @@ ctrls.controller 'MyController',
     $scope.edit_link = (leafID)->
       Services.update_link($scope.tree.id, leafID, $scope.linkName, $scope.linkUrl, $scope.linkCategoryID).then (tree)->
         $scope.reset_tree(tree)
-
-#    $scope.get_category_name = (category_id)->
-#      for branch in $scope.tree.branches
-#        if(branch.category.id == category_id)
-#          return branch.category.name
-
-#    $scope.set_link_name = (link)->
-#      for leaf in $scope.tree.leafs
-#        if(leaf.link_id == link.id)
-#          link.name = leaf.name
-#          return leaf.name
 
     $scope.toggle_new_link_modal = (type)->
       $scope.toggleLinkModal = type
@@ -163,6 +147,13 @@ ctrls.controller 'MyController',
             return leaf
       return null
 
+
+    $scope.get_branch_by_category_id = (category_id) ->
+      for branch in $scope.tree.branches
+        if (branch.category.id == category_id)
+          return branch
+      return null
+
     $scope.get_branch_by_id = (id) ->
       for branch in $scope.tree.branches
           if (branch.id == id)
@@ -198,8 +189,7 @@ ctrls.controller 'MyController',
           $scope.delete_category(statID)
         if (action == 'zoom')
           console.log(branch)
-          $scope.sketch_tree(false, branch.category.id, branch.angle)
-
+          $scope.sketch_tree(false, branch)
 
 
     $scope.filter_tree = (el) ->

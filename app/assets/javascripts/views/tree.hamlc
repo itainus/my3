@@ -28,7 +28,7 @@
 
 .row
   %div#tree-canvas-container.col-md-12
-    %canvas#tree-canvas{:width => 1000, :height => 500}
+    %canvas#tree-canvas{:width => 1100, :height => 500}
     %div#tip-canvas.btn-group{:width => 16, :height => 16, 'title' => '', "data-toggle"=>"tooltip", "data-placement"=>"left"}
       %button#tree-canvas-stats-btn.btn.btn-sm.btn.dropdown-toggle{'type'=>"button", 'data-toggle'=>"dropdown"}
         %span.caretj

@@ -147,33 +147,32 @@ class TreeController < ApplicationController
       Rails.logger.info "[DEBUG INFO] ############## TreeController - suggest_branch - done - no suggest"
       render json: {}
     end
-
-
   end
 
   private
 
     def render_tree
-      render json: @tree.as_json(
-        only: [:id, :name],
-        include: {
-          branches: {
-            only: [:id],
-            include: {
-                category: {
-                    only: [:id, :name, :category_id]
-                },
-                leafs: {
-                    only: [:id, :name],
-                    include: {
-                        link: {
-                            only: [:id, :name, :url, :category_id]
-                        }
-                    }
-                }
-            },
-          }
-      })
+      render json: @trees.as_json
+      # (
+      #   only: [:id, :name],
+      #   include: {
+      #     branches: {
+      #       only: [:id],
+      #       include: {
+      #           category: {
+      #               only: [:id, :name, :category_id]
+      #           },
+      #           leafs: {
+      #               only: [:id, :name],
+      #               include: {
+      #                   link: {
+      #                       only: [:id, :name, :url, :category_id]
+      #                   }
+      #               }
+      #           }
+      #       },
+      #     }
+      # })
     end
 
     def render_branches

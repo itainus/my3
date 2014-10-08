@@ -48,37 +48,37 @@ class HomeController < ApplicationController
         })
   end
 
+  def xxx tree
+    Rails.logger.info "[DEBUG INFO] ############## HomeController - xxx ##############"
+    tree.as_json(
+        only: [:id, :name],
+        include: {
+            branches: {
+                only: [:id],
+                include: {
+                    category: {
+                        only: [:id, :name, :category_id]
+                    },
+                    branches: {
+                        only: [:id, :name]
+                    },
+                    leafs: {
+                        only: [:id, :name],
+                        include: {
+                            link: {
+                                only: [:id, :name, :url, :category_id]
+                            }
+                        }
+                    }
+                },
+            }
+        })
+  end
+
   def trees
     Rails.logger.info "[DEBUG INFO] ############## HomeController - trees ##############"
 
-    render json: @trees.as_json(
-      only: [:id, :name],
-      include: {
-        branches: {
-          only: [:id],
-          include: {
-            category: {
-              only: [:id, :name, :category_id]
-            },
-            leafs: {
-              only: [:id, :name],
-              include: {
-                link: {
-                    only: [:id, :name, :url, :category_id]
-                }
-              }
-            },
-            branches: {
-              only: [:id, :name]
-              # ,include: {
-              #   branches: {
-              #       only: [:id]
-              #   }
-              # }
-            }
-          }
-        }
-      })
+    render json: @trees.as_json
   end
 
   def friends
@@ -86,29 +86,32 @@ class HomeController < ApplicationController
 
     render json: current_user.friends.as_json(
       only: [:id, :email],
-      include: {
-        trees:{
-          only: [:id, :name],
-          include: {
-            branches: {
-              only: [:id],
-              include: {
-                category: {
-                    only: [:id, :name, :category_id]
-                },
-                leafs: {
-                  only: [:id, :name],
-                  include: {
-                    link: {
-                        only: [:id, :name, :url, :category_id]
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      })
+      methods: [:trees]
+
+      # include: {
+      #   trees:{
+      #     only: [:id, :name],
+      #     include: {
+      #       branches: {
+      #         only: [:id],
+      #         include: {
+      #           category: {
+      #               only: [:id, :name, :category_id]
+      #           },
+      #           leafs: {
+      #             only: [:id, :name],
+      #             include: {
+      #               link: {
+      #                   only: [:id, :name, :url, :category_id]
+      #               }
+      #             }
+      #           }
+      #         }
+      #       }
+      #     }
+      #   }
+      # }
+    )
   end
 
 end

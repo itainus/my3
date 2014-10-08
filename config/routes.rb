@@ -3,7 +3,10 @@ Rails.application.routes.draw do
 
   get 'home/index'
 
-  devise_for :users
+  # devise_for :users
+  devise_for :users do
+    get '/users/sign_out' => 'devise/sessions#destroy'
+  end
 
   root 'home#index'
   # get 'tree/index'
