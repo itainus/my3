@@ -44,13 +44,16 @@ class Tree < ActiveRecord::Base
   end
 
   def link_exists(link_id)
-    self.branches.joins(leafs: :link).where('links.id' => link_id).exists?
+    self.branches.joins(leafs: :link).where('links.id' => link_id)
+    # Leaf.joins(:link, branch: :tree).where("links.id = ? AND trees.id = ?", link_id, self.id)
   end
 
   def leaf_link(link, link_name)
     Rails.logger.info "[DEBUG INFO] ############## Tree - leaf_link - link_id = #{link.id}, link_name = '#{link_name}' ##############"
 
-    if self.link_exists(link.id)
+    leaf = nil
+
+    if self.link_exists(link.id).exists?
       Rails.logger.info "[DEBUG INFO] tree already has leaf with link_id = #{link.id}"
     else
       Rails.logger.info "[DEBUG INFO] adding leaf (link_id = #{link.id})"
@@ -58,11 +61,14 @@ class Tree < ActiveRecord::Base
       branch = self.branch_category(link.category_id)
 
       if branch
-        branch.leafs.create(:branch_id => branch.id, :link_id => link.id, :name => link_name)
+        leaf = branch.leafs.create(:branch_id => branch.id, :link_id => link.id, :name => link_name)
       else
         Rails.logger.info "[DEBUG INFO] failed to create branch"
       end
     end
+
+    # Rails.logger.info "[DEBUG INFO] #{leaf.as_json}"
+    leaf
   end
 
   def self.generate_random(user_id, minDepth, maxDepth, minBranchesPerDepth, maxBranchesPerDepth, minLeafsPerBranch, maxLeafsPerBranch)
@@ -126,7 +132,12 @@ class Tree < ActiveRecord::Base
               only: [:id, :name],
               include: {
                 link: {
-                    only: [:id, :name, :url, :category_id]
+                  only: [:id, :name, :url, :category_id],
+                  include: {
+                    link_meta_data: {
+                      only: [:favicon]
+                    }
+                  }
                 }
               }
             }

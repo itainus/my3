@@ -66,7 +66,7 @@ angular.module('Mytree.treeSketch', ['ngResource'])
       reduction = Math.round(50 + Math.random()*20)/100;
     
       line_width = 10;
-      leaf_radius = 5;
+      leaf_radius = 8;
 
       ctx.fillStyle = 'brown';
       ctx.strokeStyle = "brown";
@@ -78,7 +78,7 @@ angular.module('Mytree.treeSketch', ['ngResource'])
       trunk_min_length = 200
       trunk_length = trunk_min_length
 
-      sp = {x: W/2, y: 50}
+      sp = {x: W/2, y: 20}
       ep = t.get_endpoint(sp.x, sp.y, trunk.angle, trunk_length);
 
       ep.id = trunk.id;
@@ -194,6 +194,8 @@ angular.module('Mytree.treeSketch', ['ngResource'])
           m_leafs[leaf.id] = leaf
           img = new Image();
           img.src = 'http://g.etfv.co/' + leaf.link.url
+          if leaf.link.link_meta_data
+            img.src = leaf.link.link_meta_data.favicon
           img.leaf = leaf
           img.onload = () ->
             ctx.beginPath();

@@ -202,7 +202,6 @@ ctrls.controller 'MyController',
         $scope.sketch_tree(false)
         return
 
-      branches_array = []
       leafs_array = []
       branches = {}
       leafs = {}
@@ -219,21 +218,64 @@ ctrls.controller 'MyController',
             b.keep = true
           else
             l.keep = false
-
       for k,b of branches
         for tb in $scope.tree.branches
           if tb.category.id == b.category.category_id
             branches[tb.id] = tb
             tb.keep = true
-
-
       $scope.sketch_tree(true)
 
       return true
 
+    $scope.create_notification = (template, vars, opts)->
+      $("#notifications-container").notify("create", template, vars, opts);
 
-#    $scope.component = 'tree'
+    $scope.init_websocket = ()->
+      if $scope.websocket_dispatcher
+        return
+      websocket_endpoint = document.domain + ':3000/websocket'
+      $scope.websocket_dispatcher = new WebSocketRails(websocket_endpoint)
+      $scope.websocket_dispatcher.on_open = (data) ->
+        console.log "Connection has been established:", data
+      $scope.websocket_dispatcher.on_close = (data) ->
+        console.log "Connection has been closed: ", data
+        window.websocket_dispatcher = new WebSocketRails(websocket_endpoint)
+
+      $scope.websocket_dispatcher.bind 'tree.update', (response) =>
+        console.log 'tree.update bind response:', response
+        $("#notifications-container").notify()
+
+        msg = {
+          title:response.data.title,
+          text:response.data.body
+        }
+        $scope.create_notification("sticky", msg, { expires:false });
+        $scope.initialize()
+
+      $scope.websocket_dispatcher.bind 'friend.status', (response) =>
+        console.log 'friend.status bind response:', response
+        $("#notifications-container").notify()
+
+        msg = {
+          title:response.data.title,
+          text:response.data.body
+        }
+        $scope.create_notification("sticky", msg, { expires:false });
+
+#      private_channel = $scope.websocket_dispatcher.subscribe_private 'tree'
+#      private_channel.on_success = (current_user) =>
+#        console.log( current_user.email + " Has joined the channel");
+#      private_channel.on_failure = (reason) =>
+#        console.log "Authorization failed" , reason;
+#      private_channel.bind 'update', (response) =>
+#        console.log 'tree.update subscribe_private channel response:', response
+#        $("#notifications-container").notify()
+#        $scope.create_notification("sticky", { title:'tree.update - channel', text:'Example of a default notification.  I will not fade out after 5 seconds'},{ expires:false });
+
     $scope.initialize()
+    $scope.init_websocket()
+
+
 
 
 
@@ -265,9 +307,6 @@ ctrls.controller 'FriendsController',
       Services.delete_friend(userID).then (friends)->
         $scope.friends = friends
 
-
-
-
     $scope.create_notification = (template, vars, opts)->
       $("#notifications-container").notify("create", template, vars, opts);
 
@@ -282,17 +321,21 @@ ctrls.controller 'FriendsController',
         console.log "Connection has been closed: ", data
         window.websocket_dispatcher = new WebSocketRails(websocket_endpoint)
 
-
       $scope.websocket_dispatcher.bind 'tree.update', (response) =>
         console.log 'tree.update bind response:', response
         $("#notifications-container").notify()
-        $scope.create_notification("sticky", { title:'tree.update', text:'Example of a default notification.  I will not fade out after 5 seconds'},{ expires:false });
-
-      $scope.websocket_dispatcher.bind 'friend.status', (response) =>
-        console.log 'friend.status bind response:', response
-        $("#notifications-container").notify()
-        text = response.friend + ' just ' + response.action + ' you'
-        $scope.create_notification("sticky", { title:'friend.status changed', text:text},{ expires:false });
+        $scope.create_notification("sticky", {
+            title:response.data.title,
+            text:response.data.body
+          },
+          { expires:false }
+        );
+#
+#      $scope.websocket_dispatcher.bind 'friend.status', (response) =>
+#        console.log 'friend.status bind response:', response
+#        $("#notifications-container").notify()
+#        text = response.friend + ' just ' + response.action + ' you'
+#        $scope.create_notification("sticky", { title:'friend.status - direct', text:text},{ expires:false });
 
 
       private_channel = $scope.websocket_dispatcher.subscribe_private 'tree'
@@ -303,17 +346,17 @@ ctrls.controller 'FriendsController',
       private_channel.bind 'update', (response) =>
         console.log 'tree.update subscribe_private channel response:', response
         $("#notifications-container").notify()
-        $scope.create_notification("sticky", { title:'Default Notification', text:'Example of a default notification.  I will not fade out after 5 seconds'},{ expires:false });
+        $scope.create_notification("sticky", { title:'tree.update - channel', text:'Example of a default notification.  I will not fade out after 5 seconds'},{ expires:false });
 
-      private_channel2 = $scope.websocket_dispatcher.subscribe_private 'friend'
-      private_channel2.on_success = (current_user) =>
-        console.log( current_user.email + " Has joined the channel");
-      private_channel2.on_failure = (reason) =>
-        console.log "Authorization failed" , reason;
-      private_channel2.bind 'status', (response) =>
-        console.log 'friend.status subscribe_private channel response:', response
-        $("#notifications-container").notify()
-        $scope.create_notification("sticky", { title:'friend.status', text:'Example of a default notification.  I will not fade out after 5 seconds'},{ expires:false });
+#      private_channel2 = $scope.websocket_dispatcher.subscribe 'friend'
+#      private_channel2.on_success = (current_user) =>
+#        console.log( current_user.email + " Has joined the channel");
+#      private_channel2.on_failure = (reason) =>
+#        console.log "Authorization failed" , reason;
+#      private_channel2.bind 'status', (response) =>
+#        console.log 'friend.status subscribe_private channel response:', response
+#        $("#notifications-container").notify()
+#        $scope.create_notification("sticky", { title:'friend.status channel', text:'Example of a default notification.  I will not fade out after 5 seconds'},{ expires:false });
 
 
 

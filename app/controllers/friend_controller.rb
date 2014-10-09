@@ -26,11 +26,18 @@ class FriendController < ApplicationController
       current_user.friends.create(:id => friend_id)
       Friendship.create(:user_id => current_user.id, :friend_id => friend_id)
 
-      # msg = {
-      #     :friend_id => friend_id,
-      #     :action => 'add'
-      # }
-      #
+      msg_title = 'Friend Status'
+      msg_body = "#{current_user.email} just added you as a friend"
+      msg = {
+          data: {
+              title: msg_title,
+              body: msg_body
+          }
+      }
+
+      notify_friend(friend_id, msg)
+
+
       # Rails.logger.info No.controller_name
       #
       # WebsocketRails.send_message :status,{} , :namespace => :friend
@@ -49,6 +56,8 @@ class FriendController < ApplicationController
       # # Rails.logger.info current_user[:ws_connection]
       # Rails.logger.info "[DEBUG INFO] ws_connection e"
 
+
+
     end
 
     render_friends
@@ -58,37 +67,51 @@ class FriendController < ApplicationController
     friend_id = params[:user_id]
     current_user.friends.destroy(friend_id)
 
+    msg = {
+        data: {
+            title: "Friend Status",
+            body: "You are no longer a friend of #{current_user.email}"
+        }
+    }
+    notify_friend(friend_id, msg)
+
     render_friends
   end
 
   private
 
+  def notify_friend(friend_id, msg)
+    WebsocketRails.users[friend_id].send_message :status, msg, :namespace => :friend
+  end
+
   def render_friends
     render json: current_user.friends.as_json(
         only: [:id, :email],
-        include: {
-            trees:{
-                only: [:id, :name],
-                include: {
-                    branches: {
-                        only: [:id],
-                        include: {
-                            category: {
-                                only: [:id, :name, :category_id]
-                            },
-                            leafs: {
-                                only: [:id, :name],
-                                include: {
-                                    link: {
-                                        only: [:id, :name, :url, :category_id]
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        })
+        methods: [:trees]
+        # ,include: {
+        #     trees:{
+        #         only: [:id, :name],
+        #         include: {
+        #             branches: {
+        #                 only: [:id],
+        #                 include: {
+        #                     category: {
+        #                         only: [:id, :name, :category_id]
+        #                     },
+        #                     leafs: {
+        #                         only: [:id, :name],
+        #                         include: {
+        #                             link: {
+        #                                 only: [:id, :name, :url, :category_id]
+        #                             }
+        #                         }
+        #                     }
+        #                 }
+        #             }
+        #         }
+        #     }
+        # }
+    )
   end
 
 end

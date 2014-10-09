@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20141005171105) do
+ActiveRecord::Schema.define(version: 20141008205259) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -35,6 +35,12 @@ ActiveRecord::Schema.define(version: 20141005171105) do
 
   add_index "categories", ["category_id"], name: "index_categories_on_category_id", using: :btree
 
+  create_table "domains", force: true do |t|
+    t.string   "name"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
   create_table "friendships", force: true do |t|
     t.integer  "user_id"
     t.integer  "friend_id"
@@ -51,14 +57,25 @@ ActiveRecord::Schema.define(version: 20141005171105) do
   add_index "leafs", ["branch_id"], name: "index_leafs_on_branch_id", using: :btree
   add_index "leafs", ["link_id"], name: "index_leafs_on_link_id", using: :btree
 
+  create_table "link_meta_data", force: true do |t|
+    t.integer  "link_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.string   "favicon"
+  end
+
+  add_index "link_meta_data", ["link_id"], name: "index_link_meta_data_on_link_id", using: :btree
+
   create_table "links", force: true do |t|
     t.string   "url"
     t.integer  "category_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "domain_id"
   end
 
   add_index "links", ["category_id"], name: "index_links_on_category_id", using: :btree
+  add_index "links", ["domain_id"], name: "index_links_on_domain_id", using: :btree
 
   create_table "trees", force: true do |t|
     t.string   "name"

@@ -16,7 +16,7 @@ class NotificationsController < WebsocketRails::BaseController
 
     if can? :subscribe, channel
       controller_store[current_user.id] = connection
-      current_user[:ws_connection] = connection
+      Rails.logger.info "[DEBUG INFO] authorize_channel #{channel.as_json}"
       accept_channel current_user
     else
       deny_channel({:message => 'authorization failed!'})
@@ -39,23 +39,32 @@ class NotificationsController < WebsocketRails::BaseController
 
     response = {:action => 'action', :data => {:leaf => true, :name => 'leaf-name' }}
 
-    connection = controller_store[current_user.id]
+    # connection = controller_store[current_user.id]
+    #
+    # connection.send_message :update, response, :namespace => :tree
 
-    connection.send_message :update, response, :namespace => :tree
+    # Rails.logger.info WebsocketRails.users[current_user.id].send_message :updatee, response
+    WebsocketRails.users[current_user.id].send_message :update, response, :namespace => :tree
+    # WebsocketRails[:tree].trigger(:updatee, response)
+    Rails.logger.info "[DEBUG INFO] ############## NotificationsController - tree_update - done ##########"
   end
 
   def friend_status
     Rails.logger.info "[DEBUG INFO] ############## NotificationsController - friend_status -  ##########"
     Rails.logger.info message.as_json
 
-    if controller_store[message[:friend_id]].present?
+    response = {:friend => current_user[:email], :data => {:action => message[:action], 'itay' => 'king'}}
+    # response = {}
+    if true #controller_store[message[:friend_id]].present?
       Rails.logger.info "[DEBUG INFO] connection of user_id = #{message[:friend_id]} exists"
-      response = {:friend => current_user[:email], :action => message[:action]}
+
       connection = controller_store[message[:friend_id]]
-      connection.send_message :status,response , :namespace => :friend
+      connection.send_message :status, response , :namespace => :friend
     else
       Rails.logger.info "[DEBUG INFO] no connection of user_id = #{message[:friend_id]} exists"
     end
+
+     # WebsocketRails[:friend].trigger(:status, response)
 
     # connection = controller_store[current_user.id]
     # Rails.logger.info controller_store[current_user.id]

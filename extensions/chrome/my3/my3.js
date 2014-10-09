@@ -68,38 +68,43 @@ var My3 = {
         });
     },
 
+    initWS: function()
+    {
+
+        testWebSocket()
+
+        function testWebSocket() {
+            My3.ws = new WebSocket(My3.wsUrl);
+            My3.ws.onopen = function(evt) { onOpen(evt) };
+            My3.ws.onclose = function(evt) { onClose(evt) };
+            My3.ws.onmessage = function(evt) { onMessage(evt) };
+            My3.ws.onerror = function(evt) { onError(evt) };
+        }
+
+        function onOpen(evt) {
+            console.log('CONNECTED',evt)
+        }
+        function onClose(evt) {
+            console.log('DISCONNECTED',evt)
+        }
+        function onMessage(evt) {
+            console.log('onMessage',evt)
+//            My3.ws.close();
+        }
+        function onError(evt) {
+            console.log('onError',evt)
+        }
+        function doSend(message) {
+            console.log('doSend',message)
+            My3.ws.send(message);
+        }
+    },
+
 	init: function()
 	{
 		console.log ('my3 - init');
-//
-//        var ws;
-//        if ("WebSocket" in window) {
-//            My3.ws = new WebSocket(My3.wsUrl);
-//            My3.ws.onopen = function() {
-//                My3.ws.send("hello");
-//            };
-//        }
 
-        My3.ws = new WebSocket(My3.wsUrl);
-
-        My3.ws.on_open = function(data) {
-            console.log("Connection has been established: " + data);
-        };
-
-        My3.ws.on_close = function(data) {
-            console.log("Connection has been closed: " + data);
-            My3.ws = new WebSocket(My3.wsUrl);
-        };
-
-//        var channel = My3.ws.subscribe('rsvp');
-//
-//        channel.bind('new',function(rsvp){
-//            console.log('subscribe rsvp');
-//            console.log(rsvp)
-//        });
-
-//        My3.ws.send("rsvp.new");
-
+       // this.initWS();
 
         chrome.cookies.get({'url': My3.url, 'name': 'XSRF-TOKEN'}, function(cookie){
              My3.xsrfToken = decodeURIComponent(cookie.value);
@@ -168,16 +173,6 @@ document.addEventListener('DOMContentLoaded', function () {
 			dataType: 'json',
 			success: function(response)
 			{
-				//console.log(response);
-				//alert( "added!" );
-
-                var rsvp = {
-                    attending: true,
-                    user_id: 54321
-                };
-
-                My3.ws.send('rsvp');
-
                 window.close();
 			},
 			fail: function(e)
@@ -231,4 +226,12 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     });
+
+    $('#test-btn').click(function(e) {
+        e.stopPropagation();
+        console.log('test-btn clicked');
+        My3.ws.send('["tree.update",{"data":{"testing_ws":true,"user_id":8888}}]')
+        return false;
+    });
+
 });
