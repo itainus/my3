@@ -125,7 +125,8 @@ angular.module('Mytree.treeSketch', ['ngResource'])
         i = 1
         for b in branches
           branch = m_branches[b.id]
-          only_leafs = (branch.branches.length == 0)
+#          only_leafs = (branch.branches.length == 0)
+          only_leafs = (branch.branches.length == 0) and (branch.leafs.length < 4)
 
           branch_min_length = parent_branch.min_length * reduction
           branch_length = branch_min_length + (branch.leafs.length * (!only_leafs) * 10);
@@ -176,7 +177,7 @@ angular.module('Mytree.treeSketch', ['ngResource'])
     leafs: (branch) ->
       j = 0
       leafs = branch.leafs
-      no_branches = (branch.branches.length == 0)
+      no_branches = (branch.branches.length == 0) and (branch.leafs.length < 4)
 
       if !leafs
         return

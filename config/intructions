@@ -45,3 +45,5 @@ rails generate migration add_domain_id_to_links domain:references
 rails generate migration add_favicon_url_to_domains favicon_url:text
 
 rake db:rollback STEP=1
+
+heroku run rake db:migrate
