@@ -1,8 +1,8 @@
 .row
-  %button.btn.btn-sm.btn-primary{'ng-click'=>"try_websocket()"}
+  -#%button.btn.btn-sm.btn-primary{'ng-click'=>"try_websocket()"}
     %i.fa
       try websockets
-  %button.btn.btn-sm.btn-primary{'ng-click'=>"try_private_websocket()"}
+  -#%button.btn.btn-sm.btn-primary{'ng-click'=>"try_private_websocket()"}
     %i.fa
       try private websocket
   .col-md-12{:style => "height: 370px; overflow:auto;"}

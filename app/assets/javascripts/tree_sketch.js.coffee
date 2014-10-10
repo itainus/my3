@@ -52,12 +52,12 @@ angular.module('Mytree.treeSketch', ['ngResource'])
         if (!t.filter)
           b.keep = false
         m_branches[b.id] = b
-      console.log('m_branches', m_branches)
+#      console.log('m_branches', m_branches)
 
       return t.init(tree.trunk)
 
     init: (trunk) ->
-      console.log 'trunk', trunk
+#      console.log 'trunk', trunk
 
 #      length = 100 + Math.round(Math.random()*50);
 #      length = 250;
@@ -148,7 +148,7 @@ angular.module('Mytree.treeSketch', ['ngResource'])
           branch.epX = ep.x
           branch.epY = H - ep.y
 
-          console.log 'branch', branch.id , branch.category.name + ' - angle = ' + branch.angle + ' - width = ' + branch.width + ' - from ('  + branch.spX + ',' + branch.spY  + ') to (' + branch.epX + ',' + branch.epY+')'
+#          console.log 'branch', branch.id , branch.category.name + ' - angle = ' + branch.angle + ' - width = ' + branch.width + ' - from ('  + branch.spX + ',' + branch.spY  + ') to (' + branch.epX + ',' + branch.epY+')'
 
           if (!t.filter || branch.keep)
             branch.keep = true
@@ -193,7 +193,7 @@ angular.module('Mytree.treeSketch', ['ngResource'])
         leaf.sp = leaf_sp
         leaf.ep = leaf_ep
 
-        console.log 'leaf', leaf.id , leaf.name + ' - angle = ' + leaf_angle + ' - from ('  + leaf.sp.x + ',' + (H - leaf.sp.y)  + ') to (' + leaf.ep.x + ',' + (H - leaf.ep.y) + ')'
+#        console.log 'leaf', leaf.id , leaf.name + ' - angle = ' + leaf_angle + ' - from ('  + leaf.sp.x + ',' + (H - leaf.sp.y)  + ') to (' + leaf.ep.x + ',' + (H - leaf.ep.y) + ')'
 
         if (!t.filter || leaf.keep)
           leaf.keep = true

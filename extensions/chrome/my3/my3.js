@@ -1,4 +1,7 @@
 
+My3Domain = 'my-3.herokuapp.com';
+My3Domain = 'localhost:3000';
+
 function getCookie(cname) {
     var name = cname + "=";
     var ca = document.cookie.split(';');
@@ -11,9 +14,8 @@ function getCookie(cname) {
 }
 
 var My3 = {
-    wsUrl:'ws://localhost:3000/websocket',
-    url: 'http://localhost:3000',
-//    url: 'http://my-3.herokuapp.com',
+    wsUrl:'ws://' + My3Domain + '/websocket',
+    url: 'http://' + My3Domain,
     trees: null,
     treeIndex: 0,
 	treeID: 0,
@@ -96,7 +98,7 @@ var My3 = {
             console.log('DISCONNECTED',evt)
         }
         function onMessage(evt) {
-            console.log('onMessage',evt)
+            console.log('onMessage',evt);
 //            My3.ws.close();
         }
         function onError(evt) {
