@@ -1,6 +1,7 @@
 1) open chrome browser
 2) go to: chrome://extensions/
-3) drag & drop my3.crx to chrome extensions tab 
+3) extract my3.crx to your desktop
+3.1) drag & drop my3.crx from your desktop into chrome extensions tab 
 4) press on Add button
 5) you should have an icon of aback tree on the trop corner of the browser
 6) use it to add links to your my tree
