@@ -1,9 +1,9 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 5,
 
   "name": "My3",
   "description": "My3 add link",
-  "version": "1.2",
+  "version": "1.5",
 
   "browser_action": {
     "default_icon": "tree.png",
