@@ -5,17 +5,39 @@ class Link < ActiveRecord::Base
   has_many :branches, :through => :leafs
   has_one :link_meta_data, :inverse_of => :link
 
+  require 'open-uri'
 
-  def self.create_if_not_exists(link_url, link_category_id, link_meta_data)
+  def self.create_if_not_exists(link_url, link_category_id, options = {})
     link = Link.where(:category_id => link_category_id).where(:url => link_url).first
 
     if link.present?
       Rails.logger.info "[DEBUG INFO] link '#{link_url}' (parent_id = #{link_category_id}) already exists"
     else
-      Rails.logger.info "[DEBUG INFO] creating link '#{link_url}' (#{link_category_id})"
+      Rails.logger.info "[DEBUG INFO] CCreating link '#{link_url}' (#{link_category_id})"
+
       link = Link.create(:url => link_url, :category_id => link_category_id)
 
-      if link_meta_data.present?
+      if options.present?
+        link_favicon_url = options[:link_favicon_url]
+        # link_img = Base64.encode64(open(link_img_url){ |io| io.read })
+        # link_meta_data[:favicon] = link_img
+        Rails.logger.info  "[DEBUG INFO] create domain"
+        domain_options = {:favicon_url => options[:link_favicon_url]}
+        domain = Domain.create_if_not_exists link_url, domain_options
+        Rails.logger.info  "[DEBUG INFO] domain - #{domain.as_json}"
+
+        link_meta_data = {}
+
+        if domain.present?
+          link_meta_data[:domain_id] = domain.id
+          open(link_favicon_url) {|f|
+            File.open("public/favicons/#{domain.id}-favicon.ico","wb") do |file|
+              file.puts f.read
+            end
+          }
+        end
+
+        Rails.logger.info  "[DEBUG INFO] link_meta_data after - #{link_meta_data.as_json}"
         link.create_link_meta_data(link_meta_data)
       end
 

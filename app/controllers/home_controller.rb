@@ -16,65 +16,6 @@ class HomeController < ApplicationController
   def index
   end
 
-  def generate_random_tree
-    Rails.logger.info "[DEBUG INFO] ############## HomeController - test ##############"
-
-    # t = Tree.create_new(1, "Test Tree - #{rand(1..10000)}")
-    user_id = 1
-
-    User.find(user_id).trees.destroy_all
-
-    t = Tree.generate_random(user_id, 1,4,1,4,0,3)
-
-    render json: t.as_json(
-        only: [:id, :name],
-        include: {
-            branches: {
-                only: [:id],
-                include: {
-                    category: {
-                        only: [:id, :name, :category_id]
-                    }
-                },
-                leafs: {
-                    only: [:id, :name],
-                    include: {
-                        link: {
-                            only: [:id, :name, :url, :category_id]
-                        }
-                    }
-                }
-            }
-        })
-  end
-
-  def xxx tree
-    Rails.logger.info "[DEBUG INFO] ############## HomeController - xxx ##############"
-    tree.as_json(
-        only: [:id, :name],
-        include: {
-            branches: {
-                only: [:id],
-                include: {
-                    category: {
-                        only: [:id, :name, :category_id]
-                    },
-                    branches: {
-                        only: [:id, :name]
-                    },
-                    leafs: {
-                        only: [:id, :name],
-                        include: {
-                            link: {
-                                only: [:id, :name, :url, :category_id]
-                            }
-                        }
-                    }
-                },
-            }
-        })
-  end
-
   def trees
     Rails.logger.info "[DEBUG INFO] ############## HomeController - trees ##############"
 
@@ -87,31 +28,20 @@ class HomeController < ApplicationController
     render json: current_user.friends.as_json(
       only: [:id, :email],
       methods: [:trees]
-
-      # include: {
-      #   trees:{
-      #     only: [:id, :name],
-      #     include: {
-      #       branches: {
-      #         only: [:id],
-      #         include: {
-      #           category: {
-      #               only: [:id, :name, :category_id]
-      #           },
-      #           leafs: {
-      #             only: [:id, :name],
-      #             include: {
-      #               link: {
-      #                   only: [:id, :name, :url, :category_id]
-      #               }
-      #             }
-      #           }
-      #         }
-      #       }
-      #     }
-      #   }
-      # }
     )
+  end
+
+  def generate_random_tree
+    Rails.logger.info "[DEBUG INFO] ############## HomeController - test ##############"
+
+    # t = Tree.create_new(1, "Test Tree - #{rand(1..10000)}")
+    user_id = 1
+
+    User.find(user_id).trees.destroy_all
+
+    t = Tree.generate_random(user_id, 1,4,1,4,0,3)
+
+    render json: t.as_json
   end
 
 end

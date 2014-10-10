@@ -72,3 +72,5 @@ end
 gem 'websocket-rails'
 
 gem "cancan"
+
+gem "public_suffix"

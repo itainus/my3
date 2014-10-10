@@ -16,8 +16,11 @@
     -#  %button.btn.btn-default{:type => "button", 'ng-click'=>"filter_tree($event)"} Search!
 .col-lg-4
   %select#friends-form.form-control1{'ng-change' => "show_friend_tree()", 'ng-model' => "friend", 'ng-options' => 'friend as (friend.email) for friend in friends'}
-    %option{:value => '', :disabled => 'disabled', :selected => 'selected'}
-      Show Friend's Tree
+    %option{:value => ''}
+      My Tree
+    -#%option{:value => '', :disabled => 'disabled', :selected => 'selected'}
+      Show Friend'zzs Tree
+
 
 != JST['views/new_category']()
 != JST['views/new_link']()

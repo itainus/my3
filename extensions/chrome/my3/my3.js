@@ -43,7 +43,7 @@ var My3 = {
 		});
 	},
 
-    populateCategories: function()
+    populateCategories: function(selectedCategoryID)
     {
         var suggestCategory = My3.suggestCategory;
         var treeIndex = My3.treeIndex;
@@ -60,18 +60,26 @@ var My3 = {
             addLinkCategorySelect.append('<option disabled="disabled" value="?">' + '__________________________' + '</option>');
         }
 
+        var selected;
         $.each(tree.branches, function() {
             var b = this;
             //console.log(b)
-            addLinkCategorySelect.append('<option value="' + b.category.id + '">' + b.category.name + '</option>');//.val(leaf.id).text(this.Name));
-            addCategoryParentSelect.append('<option value="' + b.category.id + '">' + b.category.name + '</option>');
+            selected = '';
+
+            if (b.category.id == selectedCategoryID)
+            {
+                selected = 'selected="selected"';
+            }
+
+            addLinkCategorySelect.append('<option value="' + b.category.id + '" ' + selected + '>' + b.category.name + '</option>');//.val(leaf.id).text(this.Name));
+            addCategoryParentSelect.append('<option value="' + b.category.id + '" ' + selected + '>' + b.category.name + '</option>');
         });
     },
 
     initWS: function()
     {
 
-        testWebSocket()
+        testWebSocket();
 
         function testWebSocket() {
             My3.ws = new WebSocket(My3.wsUrl);
@@ -144,7 +152,7 @@ var My3 = {
                     console.log('suggest_category', category);
                     My3.suggestCategory = category;
 
-                    My3.populateCategories();
+                    My3.populateCategories(category.id);
 
                 });
 			});
@@ -208,14 +216,22 @@ document.addEventListener('DOMContentLoaded', function () {
             url: My3.url + "/tree/" + My3.treeID + "/category_create",
             data: data,
             dataType: 'json',
-            success: function(tree)
+            success: function(response)
             {
-                //console.log(tree);
-                My3.trees[My3.treeIndex] = tree;
-                My3.populateCategories();
+                if (response.success) {
+                    var tree = My3.trees[My3.treeIndex];
 
-                $('#add-category-form').hide();
-                $('#add-link-form').show();
+                    tree.branches.push(response.branch);
+
+                    My3.populateCategories(response.branch.category.id);
+
+                    $('#add-category-form').hide();
+                    $('#add-link-form').show();
+                }
+                else
+                {
+                    console.error(response)
+                }
             },
             fail: function(e)
             {
@@ -227,11 +243,11 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    $('#test-btn').click(function(e) {
-        e.stopPropagation();
-        console.log('test-btn clicked');
-        My3.ws.send('["tree.update",{"data":{"testing_ws":true,"user_id":8888}}]')
-        return false;
-    });
+//    $('#test-btn').click(function(e) {
+//        e.stopPropagation();
+//        console.log('test-btn clicked');
+//        My3.ws.send('["tree.update",{"data":{"testing_ws":true,"user_id":8888}}]');
+//        return false;
+//    });
 
 });

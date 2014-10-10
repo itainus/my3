@@ -12,7 +12,7 @@ angular.module('Mytree.treeSketch', ['ngResource'])
 #    divergence = 0
     reduction = 0
     leaf_radius = 0
-
+    branch_name_padding = 0
     start_points = []
     m_branches = {}
     m_leafs = {}
@@ -67,6 +67,7 @@ angular.module('Mytree.treeSketch', ['ngResource'])
     
       line_width = 10;
       leaf_radius = 8;
+      branch_name_padding = 5
 
       ctx.fillStyle = 'brown';
       ctx.strokeStyle = "brown";
@@ -113,10 +114,10 @@ angular.module('Mytree.treeSketch', ['ngResource'])
 
         line_width = parent_branch.width * reduction;
 
-        ctx.beginPath();
-        ctx.fillStyle = 'brown';
-        ctx.strokeStyle = "brown";
-        ctx.lineWidth = line_width;
+#        ctx.beginPath();
+#        ctx.fillStyle = 'brown';
+#        ctx.strokeStyle = "brown";
+#        ctx.lineWidth = line_width;
 
         branches = parent_branch.branches
         t.sort_branches(branches)
@@ -151,20 +152,25 @@ angular.module('Mytree.treeSketch', ['ngResource'])
 
           if (!t.filter || branch.keep)
             branch.keep = true
+            ctx.beginPath();
+            ctx.fillStyle = 'brown';
+            ctx.strokeStyle = "brown";
+            ctx.lineWidth = branch_length;
             ctx.lineWidth = branch_width;
             ctx.moveTo(sp.x, H - sp.y);
             ctx.lineTo(ep.x, H - ep.y);
             ctx.stroke();
+
             t.leafs(branch)
 
           new_start_points.push(ep);
-
-      ctx.stroke();
 
       start_points = new_start_points;
 
       if (new_start_points.length)
         setTimeout(t.branches, 50);
+      else
+        t.name_branches()
       return
 
     leafs: (branch) ->
@@ -193,9 +199,12 @@ angular.module('Mytree.treeSketch', ['ngResource'])
           leaf.keep = true
           m_leafs[leaf.id] = leaf
           img = new Image();
-          img.src = 'http://g.etfv.co/' + leaf.link.url
-          if leaf.link.link_meta_data
-            img.src = leaf.link.link_meta_data.favicon
+
+          if leaf.link.link_meta_data && leaf.link.link_meta_data.domain_id
+            domain_id = leaf.link.link_meta_data.domain_id
+            img.src =   "favicons/#{domain_id}-favicon.ico"
+          else
+            img.src = 'http://g.etfv.co/' + leaf.link.url
           img.leaf = leaf
           img.onload = () ->
             ctx.beginPath();
@@ -206,6 +215,27 @@ angular.module('Mytree.treeSketch', ['ngResource'])
             ctx.lineTo(this.leaf.ep.x, H - this.leaf.ep.y);
             ctx.drawImage(this, this.leaf.ep.x - 8, H - this.leaf.ep.y - 8, 16, 16);
             ctx.stroke();
+
+    name_branches: () ->
+      for k,branch of m_branches
+        if branch.keep
+
+          if branch.angle > 90
+            x = branch.epX
+            y = branch.epY
+            angle = (180 - branch.angle)
+          else
+            x = branch.spX
+            y = branch.spY
+            angle = (360 - branch.angle)
+
+          ctx.save();
+          ctx.translate(x,y)
+          ctx.rotate(angle * Math.PI/180);
+          ctx.font = (branch.width.ceil + 0)+ "px Georgia";
+          ctx.fillStyle = 'blue';
+          ctx.fillText(branch.category.name, branch_name_padding, 0, branch.length - branch_name_padding);
+          ctx.restore()
 
     sort_branches: (branches) ->
       branches.sort (a,b) ->

@@ -61,9 +61,10 @@ ActiveRecord::Schema.define(version: 20141008205259) do
     t.integer  "link_id"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.string   "favicon"
+    t.integer  "domain_id"
   end
 
+  add_index "link_meta_data", ["domain_id"], name: "index_link_meta_data_on_domain_id", using: :btree
   add_index "link_meta_data", ["link_id"], name: "index_link_meta_data_on_link_id", using: :btree
 
   create_table "links", force: true do |t|

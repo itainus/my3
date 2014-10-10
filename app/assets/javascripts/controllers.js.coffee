@@ -10,7 +10,6 @@ ctrls.controller 'MyController',
       $('#btn').tooltip();
       $('#new-link-btn').tooltip();
 
-
       $scope.tree = {}
       $scope.friends = []
       $scope.set_tree()
@@ -46,21 +45,30 @@ ctrls.controller 'MyController',
       return TreeSketch.drawTree(tree)
 
     $scope.save_category = ()->
-      Services.create_category($scope.tree.id, $scope.categoryName, $scope.categoryParentID).then (tree)->
-#        console.log('create_category cb')
-        angular.element('#newCategory').modal('hide');
-        $scope.categoryName = '';
-        $scope.categoryParentID = 1;
-        newCategory = tree.branches[tree.branches.length-1].category
-        if ($scope.toggleLinkModal == 'newLink')
-          $scope.linkCategoryID = newCategory.id
-          angular.element('#newLink').modal('show')
-          $scope.toggleLinkModal = false
-        else if ($scope.toggleLinkModal == 'editLink')
-          $scope.linkCategoryID = newCategory.id
-          angular.element('#editLink').modal('show')
-          $scope.toggleLinkModal = false
-        $scope.reset_tree(tree)
+      Services.create_category($scope.tree.id, $scope.categoryName, $scope.categoryParentID).then (response)->
+        if response.success
+          new_branch = response.branch
+
+          parent_branch = $scope.get_branch_by_category_id($scope.categoryParentID)
+
+          parent_branch.branches.push(new_branch)
+
+          $scope.myTree.branches.push(new_branch)
+          $scope.linkCategoryID = new_branch.category.id
+          $scope.reset_tree($scope.myTree)
+
+          $scope.categoryName = '';
+          $scope.categoryParentID = 1;
+
+          angular.element('#newCategory').modal('hide');
+          if ($scope.toggleLinkModal == 'newLink')
+            angular.element('#newLink').modal('show')
+            $scope.toggleLinkModal = false
+          else if ($scope.toggleLinkModal == 'editLink')
+            angular.element('#editLink').modal('show')
+            $scope.toggleLinkModal = false
+        else
+          console.error response
 
     $scope.delete_category = (branchID)->
       Services.delete_category($scope.tree.id, branchID).then (tree)->
@@ -104,11 +112,18 @@ ctrls.controller 'MyController',
         $scope.friends = friends
 
     $scope.show_friend_tree = ()->
-      $scope.tree = $scope.friend.trees[0]
+      if $scope.friend
+        $scope.tree = $scope.friend.trees[0]
+        $("#new-category-btn").attr("disabled", "disabled");
+        $("#new-link-btn").attr("disabled", "disabled");
+        $("#tree-canvas-stats").show();
+      else
+        $scope.tree = $scope.myTree
+        $("#new-category-btn").attr("disabled", null);
+        $("#new-link-btn").attr("disabled", null);
+        $("#tree-canvas-stats").hide();
+
       $scope.sketch_tree()
-      $("#new-category-btn").attr("disabled", "disabled");
-      $("#new-link-btn").attr("disabled", "disabled");
-      $("#tree-canvas-stats").show();
       return
 
     $scope.is_mytree = ()->
@@ -203,7 +218,7 @@ ctrls.controller 'MyController',
         return
 
       leafs_array = []
-      branches = {}
+      branches = []
       leafs = {}
 
       for b in $scope.tree.branches
@@ -213,16 +228,21 @@ ctrls.controller 'MyController',
           if (link.url.indexOf(q) != -1)
             leafs_array.push(l)
             leafs[l.id] = l
-            branches[b.id] = b
+            branches.push(b)
             l.keep = true
             b.keep = true
           else
             l.keep = false
-      for k,b of branches
+
+      len = branches.length
+      for i in [0...len]
+        b = branches[i]
         for tb in $scope.tree.branches
           if tb.category.id == b.category.category_id
-            branches[tb.id] = tb
+            branches.push(tb)
+            len++
             tb.keep = true
+            break
       $scope.sketch_tree(true)
 
       return true

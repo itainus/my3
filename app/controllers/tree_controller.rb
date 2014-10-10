@@ -4,17 +4,17 @@ class TreeController < ApplicationController
 
   def init
     Rails.logger.info "[DEBUG INFO] ############## TreeController - init ##############"
+    tree_id = params[:id]
+    tree = current_user.trees.find(tree_id)
 
-    trees = current_user.trees.where(:id => params[:id])
-
-    if trees.blank?
+    if tree.blank?
       e = {
-          error: "tree #{params[:id]} is not owned by user #{current_user.id}"
+          error: "tree #{tree_id} is not owned by user #{current_user.id}"
       }
       render json: e.as_json
     end
 
-    @tree = trees.first
+    @tree = tree
   end
 
   def index
@@ -31,16 +31,22 @@ class TreeController < ApplicationController
     category_parent_id = params[:category_parent_id]
     Rails.logger.info "[DEBUG INFO] ############## TreeController - create_new_category - category_name = #{category_name}, category_parent_id = #{category_parent_id} ##############"
 
+    success = true
+    branch = nil
     if category_name.blank? or category_parent_id.blank?
       Rails.logger.info "[DEBUG INFO] blank param"
-      return render_tree
+      success = false
+    else
+      category = Category.create_if_not_exists(category_name, category_parent_id)
+      branch = @tree.branch_category(category.id)
     end
 
-    category = Category.create_if_not_exists(category_name, category_parent_id)
+    response = {
+        :success => success,
+        :branch => branch
+    }
 
-    @tree.branch_category(category.id)
-
-    render_tree
+    render json: response.as_json
   end
 
   def add_category
@@ -52,9 +58,9 @@ class TreeController < ApplicationController
     render_tree
   end
 
-  def remove_category
+  def remove_branch
     branch_id = params[:branch_id]
-    Rails.logger.info "[DEBUG INFO] ############## TreeController - remove_category - branch_id = #{branch_id} ##############"
+    Rails.logger.info "[DEBUG INFO] ############## TreeController - remove_branch - branch_id = #{branch_id} ##############"
 
     if @tree.branches.exists?(branch_id)
       @tree.branches.destroy(branch_id)
@@ -84,11 +90,11 @@ class TreeController < ApplicationController
       return render_tree
     end
 
-    link_meta_data = {
-        :favicon => link_img
+    options = {
+        :link_favicon_url => link_img
     }
 
-    link = Link.create_if_not_exists(link_url, link_category_id, link_meta_data)
+    link = Link.create_if_not_exists(link_url, link_category_id, options)
 
 
     # linkImg = Base64.encode64(open(link_img){ |io| io.read })
@@ -107,10 +113,10 @@ class TreeController < ApplicationController
               body: "Leaf '#{link_name}' added to '#{category_name}' on your tree"
           }
       }
-
       notify_tree msg
     end
 
+    Rails.logger.info "[DEBUG INFO] tree = #{leaf.blank?}"
     render_tree
   end
 
@@ -184,7 +190,7 @@ class TreeController < ApplicationController
     end
 
     def render_tree
-      render json: @trees.as_json
+      render json: @tree.as_json
     end
 
     def render_branches
