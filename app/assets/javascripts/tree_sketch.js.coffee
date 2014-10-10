@@ -205,6 +205,7 @@ angular.module('Mytree.treeSketch', ['ngResource'])
           if leaf.link.link_meta_data && leaf.link.link_meta_data.domain_id
             domain_id = leaf.link.link_meta_data.domain_id
             img.src =   "favicons/#{domain_id}-favicon.ico"
+            img.src = 'http://g.etfv.co/' + leaf.link.url
           else
             img.src = 'http://g.etfv.co/' + leaf.link.url
           img.leaf = leaf

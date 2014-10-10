@@ -30,11 +30,11 @@ class Link < ActiveRecord::Base
 
         if domain.present?
           link_meta_data[:domain_id] = domain.id
-          open(link_favicon_url) {|f|
-            File.open("public/favicons/#{domain.id}-favicon.ico","wb") do |file|
-              file.puts f.read
-            end
-          }
+          # open(link_favicon_url) {|f|
+          #   File.open("public/favicons/#{domain.id}-favicon.ico","wb") do |file|
+          #     file.puts f.read
+          #   end
+          # }
         end
 
         Rails.logger.info  "[DEBUG INFO] link_meta_data after - #{link_meta_data.as_json}"
