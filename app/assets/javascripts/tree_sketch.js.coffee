@@ -171,7 +171,8 @@ angular.module('Mytree.treeSketch', ['ngResource'])
       if (new_start_points.length)
         setTimeout(t.branches, 50);
       else
-        t.name_branches()
+        console.log 't.name_branches()'
+        #t.name_branches()
       return
 
     leafs: (branch) ->
