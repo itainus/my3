@@ -115,35 +115,7 @@ class Tree < ActiveRecord::Base
   def as_json (options = nil)
     super(
       only: [:id, :name],
-      # methods: [:branches]
-      include: {
-        branches: {
-          only: [:id],
-          methods: [:leafs],
-          include: {
-            category: {
-              only: [:id, :name, :category_id]
-            },
-            branches: {
-              only: [:id, :name]
-            }
-
-            # leafs: {
-            #   only: [:id, :name],
-            #   include: {
-            #     link: {
-            #       only: [:id, :name, :url, :category_id],
-            #       include: {
-            #         link_meta_data: {
-            #           only: [:favicon]
-            #         }
-            #       }
-            #     }
-            #   }
-            # }
-          }
-        }
-      }
+      methods: [:branches]
     )
   end
 

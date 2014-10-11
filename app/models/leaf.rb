@@ -6,14 +6,19 @@ class Leaf < ActiveRecord::Base
     super(
       only: [:id, :name],
       include: {
-          link: {
-              only: [:id, :name, :url, :category_id],
+        link: {
+          only: [:id, :name, :url, :category_id],
+          include: {
+            link_meta_data: {
+              only: [],
               include: {
-                  link_meta_data: {
-                      only: [:domain_id]
-                  }
-              }
+                domain: {
+                    only: [:id]
+                }
+              },
+            }
           }
+        }
       }
     )
   end

@@ -47,11 +47,16 @@ angular.module('Mytree.treeSketch', ['ngResource'])
 
       m_leafs = {}
       m_branches = {}
+      m_branches[tree.trunk.id] = tree.trunk
 
       for b in branches
         if (!t.filter)
           b.keep = false
         m_branches[b.id] = b
+
+      tree.trunk.rank = 0
+      t.set_branches_rank(tree.trunk)
+      t.set_branches_weight(tree.trunk)
 #      console.log('m_branches', m_branches)
 
       return t.init(tree.trunk)
@@ -100,6 +105,8 @@ angular.module('Mytree.treeSketch', ['ngResource'])
 
       t.leafs(trunk)
 
+      console.log 'trunk', trunk.id , trunk.category.name + ' - weight = ' + trunk.weight + ' - rank = ' + trunk.rank + ' - angle = ' + trunk.angle + ' - width = ' + trunk.width + ' - from ('  + trunk.spX + ',' + trunk.spY  + ') to (' + trunk.epX + ',' + trunk.epY+')'
+
       start_points.push(ep);
       return t.branches();
 
@@ -113,11 +120,6 @@ angular.module('Mytree.treeSketch', ['ngResource'])
           continue
 
         line_width = parent_branch.width * reduction;
-
-#        ctx.beginPath();
-#        ctx.fillStyle = 'brown';
-#        ctx.strokeStyle = "brown";
-#        ctx.lineWidth = line_width;
 
         branches = parent_branch.branches
         t.sort_branches(branches)
@@ -149,7 +151,7 @@ angular.module('Mytree.treeSketch', ['ngResource'])
           branch.epX = ep.x
           branch.epY = H - ep.y
 
-#          console.log 'branch', branch.id , branch.category.name + ' - angle = ' + branch.angle + ' - width = ' + branch.width + ' - from ('  + branch.spX + ',' + branch.spY  + ') to (' + branch.epX + ',' + branch.epY+')'
+          console.log 'branch', branch.id , branch.category.name + ' - weight = ' + branch.weight + ' - rank = ' + branch.rank + ' - angle = ' + branch.angle + ' - width = ' + branch.width + ' - from ('  + branch.spX + ',' + branch.spY  + ') to (' + branch.epX + ',' + branch.epY+')'
 
           if (!t.filter || branch.keep)
             branch.keep = true
@@ -240,17 +242,40 @@ angular.module('Mytree.treeSketch', ['ngResource'])
           ctx.fillText(branch.category.name, branch_name_padding, 0, branch.length - branch_name_padding);
           ctx.restore()
 
+    set_branches_rank: (trunk) ->
+      for b in trunk.branches
+        branch = m_branches[b.id]
+        branch.rank = trunk.rank + 1
+        t.set_branches_rank(branch)
+
+    set_branches_weight: (trunk) ->
+      trunk.weight = 1 + trunk.leafs.length;
+      for b in trunk.branches
+        branch = m_branches[b.id]
+        trunk.weight += t.set_branches_weight(branch)
+      return trunk.weight
+
     sort_branches: (branches) ->
       branches.sort (a,b) ->
         aBranch = m_branches[a.id]
         bBranch = m_branches[b.id]
-        return (aBranch.branches.length + aBranch.leafs.length) - (bBranch.branches.length + bBranch.leafs.length)
+#        return (aBranch.branches.length + aBranch.leafs.length) - (bBranch.branches.length + bBranch.leafs.length)
+        return aBranch.weight - bBranch.weight
 
-      for i in [0...branches.length / 2] by 2
-        j = branches.length - 1 - i
+      len = branches.length
+      i = 0
+      while (i < len - i && branches[len - i - 2])
         tmp = branches[i]
-        branches[i] = branches[j]
-        branches[j] = tmp
+        branches[i] = branches[len - i - 2]
+        branches[len - i - 2] = tmp
+        i+=2
+
+#      for i in [0...branches.length / 2] by 2
+#        j = branches.length - 1 - i
+#        tmp = branches[i]
+#        branches[i] = branches[j]
+#        branches[j] = tmp
+
       return branches
 
     get_endpoint: (x, y, a, len) ->

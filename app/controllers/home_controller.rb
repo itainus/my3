@@ -19,6 +19,7 @@ class HomeController < ApplicationController
   def trees
     Rails.logger.info "[DEBUG INFO] ############## HomeController - trees ##############"
 
+    # render plain: b.rank
     render json: @trees.as_json
   end
 
