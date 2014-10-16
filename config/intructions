@@ -47,3 +47,5 @@ rails generate migration add_favicon_url_to_domains favicon_url:text
 rake db:rollback STEP=1
 
 heroku run rake db:migrate
+
+rails generate model Following branch:references

@@ -40,6 +40,43 @@ class Tree < ActiveRecord::Base
     self.branches.joins(:leafs).where('leafs.id' => leaf_id).exists?
   end
 
+  def branch_fully branch_id
+    Rails.logger.info "[DEBUG INFO] ############## Tree - branch_fully - branch_id = #{branch_id} ##############"
+
+    branch = Branch.find(branch_id)
+
+    if branch[:tree_id] == self.id
+      Rails.logger.info "[DEBUG INFO] branch '#{branch_id}' already exists on tree #{self.ids}"
+
+      return branch
+    end
+
+    my_branch = nil
+
+    if branch.present?
+      category_id = branch.category.id
+      my_branch = branch_category(category_id)
+      if my_branch.present?
+
+        branch.leafs.each do |l|
+          # leaf = my_branch.leafs.create(:branch_id => my_branch.id, :link_id => l.link.id, :name => l.name)
+          leaf = leaf_link(l.link, l.name)
+        end
+
+        branch.branches.each do |b|
+          my_branch = branch_fully(b.id)
+        end
+
+      else
+        Rails.logger.info "[DEBUG INFO] failed to branch_category - category_id = '#{category_id}'"
+      end
+    else
+      Rails.logger.info "[DEBUG INFO] branch '#{branch_id}' dose not exists"
+    end
+
+    my_branch
+  end
+
   def link_exists(link_id)
     self.branches.joins(leafs: :link).where('links.id' => link_id)
     # Leaf.joins(:link, branch: :tree).where("links.id = ? AND trees.id = ?", link_id, self.id)

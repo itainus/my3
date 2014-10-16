@@ -58,6 +58,15 @@ class TreeController < ApplicationController
     render_tree
   end
 
+  def add_branch
+    branch_id = params[:branch_id]
+    Rails.logger.info "[DEBUG INFO] ############## TreeController - add_branch - branch_id = #{branch_id} ##############"
+
+    @tree.branch_fully(branch_id)
+
+    render_tree
+  end
+
   def remove_branch
     branch_id = params[:branch_id]
     Rails.logger.info "[DEBUG INFO] ############## TreeController - remove_branch - branch_id = #{branch_id} ##############"

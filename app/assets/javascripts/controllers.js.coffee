@@ -155,6 +155,10 @@ ctrls.controller 'MyController',
         $scope.myTree = myTree
         $scope.tree = $scope.tree
 
+    $scope.add_branch_to_mytree = (branch_id)->
+      Services.add_branch($scope.myTree.id, branch_id).then (myTree)->
+        $scope.reset_tree(myTree)
+
     $scope.get_leaf_by_id = (id) ->
       for branch in $scope.tree.branches
         for leaf in branch.leafs
@@ -195,7 +199,8 @@ ctrls.controller 'MyController',
       if (statType == 'branch')
         branch = $scope.get_branch_by_id(statID)
         if (action == 'add')
-          $scope.add_category_to_mytree(branch.category.id)
+          $scope.add_branch_to_mytree(branch.id)
+
         if (action == 'follow')
           null
         if (action == 'edit')

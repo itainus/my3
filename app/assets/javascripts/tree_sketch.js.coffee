@@ -352,6 +352,9 @@ angular.module('Mytree.treeSketch', ['ngResource'])
 
     onCanvasClick: (e) ->
       pt = t.getMouse(e, canvas);
+
+      console.log(e)
+
       name = ''
       id = 0;
       type = ''
@@ -359,23 +362,35 @@ angular.module('Mytree.treeSketch', ['ngResource'])
 
       e.stopPropagation()
 
-#      console.log 'leaf-click', pt.x, pt.y
-      l = t.getLeafByPoint(pt.x, pt.y)
+#      if (e.currentTarget.id == 'tip-canvas')
+#        showMenu = true
+#        type = $('#tree-canvas-stats-menu').attr('data-stats-type')
+#        id = $('#tree-canvas-stats-menu').attr('data-stats-id')
 
+#      console.log 'leaf-click', pt.x, pt.y
+
+      l = t.getLeafByPoint(pt.x, pt.y)
       if l
-        $('#tree-canvas-stats-zoom').hide()
+
         name = l.name
         id = l.id
         type = 'leaf'
+        $('.branch-action').hide()
+        $('.leaf-action').show()
+
+#        $('#tree-canvas-stats-zoom').hide()
         $('#tree-canvas-stats-goto').attr("href", l.link.url);
-        $('#tree-canvas-stats-goto').show()
+#        $('#tree-canvas-stats-goto').show()
         showMenu = true
       else
 #        console.log('point clicked = (' + pt.x + ',' + pt.y + ')')
         b = t.getBranchByPoint(pt.x, pt.y)
         if b
-          $('#tree-canvas-stats-goto').hide()
-          $('#tree-canvas-stats-zoom').show()
+          $('.leaf-action').hide()
+          $('.branch-action').show()
+
+#          $('#tree-canvas-stats-goto').hide()
+#          $('#tree-canvas-stats-zoom').show()
           name = b.category.name
           id = b.id
           type = 'branch'

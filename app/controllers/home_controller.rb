@@ -2,6 +2,8 @@ class HomeController < ApplicationController
 
   before_filter :init
 
+  @@abc = 0;
+
   def init
     Rails.logger.info "[DEBUG INFO] ############## HomeController - init ##############"
 
@@ -17,8 +19,8 @@ class HomeController < ApplicationController
   end
 
   def trees
-    Rails.logger.info "[DEBUG INFO] ############## HomeController - trees ##############"
-
+    Rails.logger.info "[DEBUG INFO] ############## HomeController - trees - @@abc = #{@@abc} ##############"
+    @@abc += 1
     # render plain: b.rank
     render json: @trees.as_json
   end

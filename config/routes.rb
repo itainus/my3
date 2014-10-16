@@ -29,6 +29,8 @@ Rails.application.routes.draw do
   post "tree/:id/category_add"    => "tree#add_category"
   post "tree/:id/category_remove" => "tree#remove_branch"
 
+  post "tree/:id/branch_add" => "tree#add_branch"
+
   post "tree/:id/link_create" => "tree#create_new_link"
   post "tree/:id/link_add"    => "tree#add_link"
   post "tree/:id/link_remove" => "tree#remove_link"

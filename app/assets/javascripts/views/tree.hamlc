@@ -31,29 +31,29 @@
 
 .row
   %div#tree-canvas-container.col-md-12
-    %canvas#tree-canvas{:width => 1100, :height => 500}
+    %canvas#tree-canvas{:width => 1100, :height => 600}
     %div#tip-canvas.btn-group{:width => 16, :height => 16, 'title' => '', "data-toggle"=>"tooltip", "data-placement"=>"left"}
       %button#tree-canvas-stats-btn.btn.btn-sm.btn.dropdown-toggle{'type'=>"button", 'data-toggle'=>"dropdown"}
         %span.caretj
         %i.fa.fa-list-ul
       %ul#tree-canvas-stats-menu.dropdown-menu{'role'=>"menu", 'data-stats-type' => '', 'data-stats-id' => ''}
-        %li
-          %a#tree-canvas-stats-goto{'href'=>"#", 'target' => '_blank'}
+        %li.leaf-action
+          %a#tree-canvas-stats-goto{'href'=>"#", 'target' => '_blank', 'title' => 'Open link in a new tab'}
             %i.fa.fa-share
-        %li
-          %a#tree-canvas-stats-zoom{'onclick' => 'return false;', 'href'=>"#", 'ng-click'=>"tree_stats('zoom')"}
+        %li.branch-action
+          %a#tree-canvas-stats-zoom{'onclick' => 'return false;', 'href'=>"#", 'ng-click'=>"tree_stats('zoom')", 'title' => 'Zoom-in branch'}
             %i.glyphicon.glyphicon-zoom-in
-        %li{'ng-if' => '!is_mytree()'}
-          %a#tree-canvas-stats-add{'onclick' => 'return false;', 'href'=>"#", 'ng-click'=>"tree_stats('add')"}
+        %li.branch-action.leaf-action{'ng-if' => '!is_mytree()'}
+          %a#tree-canvas-stats-add{'onclick' => 'return false;', 'href'=>"#", 'ng-click'=>"tree_stats('add')", 'title' => 'Add to MyTree'}
             %i.fa.fa-plus
-        %li{'ng-if' => '!is_mytree()'}
-          %a#tree-canvas-stats-follow{'onclick' => 'return false;', 'href'=>"#", 'ng-click'=>"tree_stats('follow')"}
+        %li.branch-action{'ng-if' => '!is_mytree()'}
+          %a#tree-canvas-stats-follow{'onclick' => 'return false;', 'href'=>"#", 'ng-click'=>"tree_stats('follow')", 'title' => 'Follow branch'}
             %i.fa.fa-star
-        %li{'ng-if' => 'is_mytree()'}
-          %a#tree-canvas-stats-edit{'onclick' => 'return false;', 'href'=>"#", 'ng-click'=>"tree_stats('edit')"}
+        %li.branch-action.leaf-action{'ng-if' => 'is_mytree()'}
+          %a#tree-canvas-stats-edit{'onclick' => 'return false;', 'href'=>"#", 'ng-click'=>"tree_stats('edit')", 'title' => 'Edit'}
             %i.fa.fa-pencil
-        %li{'ng-if' => 'is_mytree()'}
-          %a#tree-canvas-stats-delete{'onclick' => 'return false;', 'href'=>"#", 'ng-click'=>"tree_stats('delete')"}
+        %li.branch-action.leaf-action{'ng-if' => 'is_mytree()'}
+          %a#tree-canvas-stats-delete{'onclick' => 'return false;', 'href'=>"#", 'ng-click'=>"tree_stats('delete')", 'title' => 'Remove from MyTree'}
             %i.fa.fa-trash-o
 
   .col-md-12{:style => "height: 370px; overflow:auto;"}
