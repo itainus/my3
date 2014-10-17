@@ -23,7 +23,7 @@ class FriendController < ApplicationController
       Rails.logger.info "[DEBUG INFO] ############## FriendController - add_friend - friend #{friend_id} already exists ##############"
     else
       Rails.logger.info "[DEBUG INFO] ############## FriendController - add_friend - adding friend #{friend_id} ##############"
-      current_user.friends.create(:id => friend_id)
+      # current_user.friends.create(:id => friend_id)
       Friendship.create(:user_id => current_user.id, :friend_id => friend_id)
 
       msg_title = 'Friend Status'
@@ -81,36 +81,15 @@ class FriendController < ApplicationController
   private
 
   def notify_friend(friend_id, msg)
-    WebsocketRails.users[friend_id].send_message :status, msg, :namespace => :friend
+    # WebsocketRails.users[friend_id].send_message :status, msg, :namespace => :friend
+    # WebsocketRails.users[friend_id].send_message :notifications, msg, :namespace => :user
+    NotificationsController.notify_user(friend_id, msg)
   end
 
   def render_friends
     render json: current_user.friends.as_json(
         only: [:id, :email],
         methods: [:trees]
-        # ,include: {
-        #     trees:{
-        #         only: [:id, :name],
-        #         include: {
-        #             branches: {
-        #                 only: [:id],
-        #                 include: {
-        #                     category: {
-        #                         only: [:id, :name, :category_id]
-        #                     },
-        #                     leafs: {
-        #                         only: [:id, :name],
-        #                         include: {
-        #                             link: {
-        #                                 only: [:id, :name, :url, :category_id]
-        #                             }
-        #                         }
-        #                     }
-        #                 }
-        #             }
-        #         }
-        #     }
-        # }
     )
   end
 

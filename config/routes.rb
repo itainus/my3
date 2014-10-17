@@ -14,36 +14,32 @@ Rails.application.routes.draw do
 
   get "home/trees" => "home#trees"
   get "home/friends" => "home#friends"
-  post "home/tree" => "home#tree"
   get "home/test" => "home#test"
-  post "friends/add" => "friend#add_friend"
-  post "friends/delete" => "friend#delete_friend"
+
+  get  "user/all" => "user#all_users"
+  post "user/branch_follow" => "user#follow_branch"
+  # get "users/sign_out" => "user#destroy_user_session"
 
 
-
-  get "tree/" => "tree#index"
-  get "tree/:id" => "tree#index"
-
-
+  get  "tree/" => "tree#index"
+  get  "tree/:id" => "tree#index"
+  get  "tree/:id/suggest_branch" => "tree#suggest_branch"
+  post "tree/:id/branch_add" => "tree#add_branch"
   post "tree/:id/category_create" => "tree#create_new_category"
   post "tree/:id/category_add"    => "tree#add_category"
   post "tree/:id/category_remove" => "tree#remove_branch"
-
-  post "tree/:id/branch_add" => "tree#add_branch"
-
   post "tree/:id/link_create" => "tree#create_new_link"
   post "tree/:id/link_add"    => "tree#add_link"
-  post "tree/:id/link_remove" => "tree#remove_link"
-  post "tree/:id/link_update" => "tree#update_link"
+  post "tree/:id/link_remove" => "tree#remove_leaf"
+  post "tree/:id/link_update" => "tree#update_leaf"
 
-  get "tree/:id/suggest_branch" => "tree#suggest_branch"
+  get  "friends" => "friend#index"
+  post "friends/add" => "friend#add_friend"
+  post "friends/delete" => "friend#delete_friend"
 
-  get "friends" => "friend#index"
-  get "user/all" => "user#all_users"
-
-  get 'notifications' => 'notifications#index'
-  get 'notifications/admin' => 'notifications#admin'
-  get 'notifications/connect' => 'notifications#connect'
+  get  'notifications' => 'notifications#index'
+  get  'notifications/admin' => 'notifications#admin'
+  get  'notifications/connect' => 'notifications#connect'
   post 'notifications/push' => 'notifications#push'
 
   # get 'notifications/rsvp', 'notifications#rsvp'

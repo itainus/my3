@@ -19,8 +19,8 @@ class HomeController < ApplicationController
   end
 
   def trees
-    Rails.logger.info "[DEBUG INFO] ############## HomeController - trees - @@abc = #{@@abc} ##############"
-    @@abc += 1
+    Rails.logger.info "[DEBUG INFO] ############## HomeController - trees ##############"
+
     # render plain: b.rank
     render json: @trees.as_json
   end
@@ -45,6 +45,37 @@ class HomeController < ApplicationController
     t = Tree.generate_random(user_id, 1,4,1,4,0,3)
 
     render json: t.as_json
+  end
+
+  def test
+    Rails.logger.info "[DEBUG INFO] ############## HomeController - test - @@abc = #{@@abc} ##############"
+    @@abc += 1
+
+
+    branch = Branch.find(13)
+
+    # current_user.followings.create(:branch_id => 131313)
+
+    render json: branch.followers.as_json
+
+    # render json: branch.as_json(
+    #     include: {
+    #         followers: {
+    #             only: [:id]
+    #         }
+    #     }
+    # )
+
+    # render json: current_user.as_json(
+    #     include: {
+    #         followings: {
+    #             only: [:id]
+    #         }
+    #         # ,followers: {
+    #         #     only: [:id]
+    #         # }
+    #     }
+    # )
   end
 
 end

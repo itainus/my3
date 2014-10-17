@@ -17,16 +17,16 @@ WebsocketRails::EventMap.describe do
   #   end
   # The above will handle an event triggered on the client like `product.new`.
 
-  namespace :websocket_rails do
-    subscribe :subscribe_private, :to => NotificationsController, :with_method => :authorize_channels
-  end
+  # namespace :websocket_rails do
+  #   subscribe :subscribe_private, :to => NotificationsController, :with_method => :authorize_channels
+  # end
+  #
+  # namespace :tree do
+  #   subscribe :update, :to => NotificationsController, :with_method => :tree_update
+  # end
 
-  namespace :tree do
-    subscribe :update, :to => NotificationsController, :with_method => :tree_update
-  end
-
-  namespace :friend do
-   subscribe :status, :to => NotificationsController, :with_method => :friend_status
+  namespace :user do
+   subscribe :notifications, :to => NotificationsController, :with_method => :on_user_notifications_bind
   end
 
 end

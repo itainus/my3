@@ -159,6 +159,10 @@ ctrls.controller 'MyController',
       Services.add_branch($scope.myTree.id, branch_id).then (myTree)->
         $scope.reset_tree(myTree)
 
+    $scope.follow_branch= (branch_id)->
+      Services.follow_branch(branch_id).then (response)->
+        console.log 'follow_branch', response
+
     $scope.get_leaf_by_id = (id) ->
       for branch in $scope.tree.branches
         for leaf in branch.leafs
@@ -200,9 +204,8 @@ ctrls.controller 'MyController',
         branch = $scope.get_branch_by_id(statID)
         if (action == 'add')
           $scope.add_branch_to_mytree(branch.id)
-
         if (action == 'follow')
-          null
+          $scope.follow_branch(branch.id)
         if (action == 'edit')
           $scope.edit_category(statID)
         if (action == 'delete')
@@ -269,26 +272,43 @@ ctrls.controller 'MyController',
         console.log "Connection has been closed: ", data
         window.websocket_dispatcher = new WebSocketRails(websocket_endpoint)
 
-      $scope.websocket_dispatcher.bind 'tree.update', (response) =>
-        console.log 'tree.update bind response:', response
-        $("#notifications-container").notify()
 
+      $scope.websocket_dispatcher.bind 'user.notifications', (notification) =>
+        console.log 'user.notifications bind response:', notification
+        $("#notifications-container").notify()
         msg = {
-          title:response.data.title,
-          text:response.data.body
+          title:notification.data.title,
+          text:notification.data.body
         }
         $scope.create_notification("sticky", msg, { expires:false });
-        $scope.initialize()
 
-      $scope.websocket_dispatcher.bind 'friend.status', (response) =>
-        console.log 'friend.status bind response:', response
-        $("#notifications-container").notify()
+#      $scope.websocket_dispatcher.bind 'tree.update', (response) =>
+#        console.log 'tree.update bind response:', response
+#        $("#notifications-container").notify()
+#        msg = {
+#          title:response.data.title,
+#          text:response.data.body
+#        }
+#        $scope.create_notification("sticky", msg, { expires:false });
+#        $scope.initialize()
 
-        msg = {
-          title:response.data.title,
-          text:response.data.body
-        }
-        $scope.create_notification("sticky", msg, { expires:false });
+#      $scope.websocket_dispatcher.bind 'friend.status', (response) =>
+#        console.log 'friend.status bind response:', response
+#        $("#notifications-container").notify()
+#        msg = {
+#          title:response.data.title,
+#          text:response.data.body
+#        }
+#        $scope.create_notification("sticky", msg, { expires:false });
+
+#      $scope.websocket_dispatcher.bind 'follow.branch', (response) =>
+#        console.log 'follow.branch bind response:', response
+#        $("#notifications-container").notify()
+#        msg = {
+#          title:response.data.title,
+#          text:response.data.body
+#        }
+#        $scope.create_notification("sticky", msg, { expires:false });
 
 #      private_channel = $scope.websocket_dispatcher.subscribe_private 'tree'
 #      private_channel.on_success = (current_user) =>

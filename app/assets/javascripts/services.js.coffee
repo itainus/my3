@@ -17,6 +17,10 @@ angular.module('Mytree.services', ['ngResource'])
       $http.post('/tree/' + tree_id + '/branch_add', {branch_id: branch_id}).then (resp) ->
         return resp.data
 
+    follow_branch: (branch_id) ->
+      $http.post('/user/branch_follow', {branch_id: branch_id}).then (resp) ->
+        return resp.data
+
     delete_category: (tree_id, branch_id) ->
       $http.post('/tree/' + tree_id + '/category_remove', {branch_id: branch_id}).then (resp) ->
         return resp.data

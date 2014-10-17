@@ -108,22 +108,9 @@ class TreeController < ApplicationController
 
     # linkImg = Base64.encode64(open(link_img){ |io| io.read })
     # src="data:image/png;base64,AAABA...."
-    
-    leaf = @tree.leaf_link(link, link_name)
 
-    Rails.logger.info "[DEBUG INFO] leaf = #{leaf.blank?}"
+    leaf = create_leaf(link, link_name)
 
-    if leaf.present?
-      category_name = Category.find(link_category_id)[:name]
-
-      msg = {
-          data: {
-              title: 'Tree Update',
-              body: "Leaf '#{link_name}' added to '#{category_name}' on your tree"
-          }
-      }
-      notify_tree msg
-    end
 
     Rails.logger.info "[DEBUG INFO] tree = #{leaf.blank?}"
     render_tree
@@ -136,7 +123,7 @@ class TreeController < ApplicationController
 
     if Link.exists?(link_id)
       link = Link.find(link_id)
-      @tree.leaf_link(link, link_name)
+      leaf = create_leaf(link, link_name)
     else
       Rails.logger.info "[DEBUG INFO] link '#{link_id}' dose not exists"
     end
@@ -144,11 +131,20 @@ class TreeController < ApplicationController
     render_tree
   end
 
-  def remove_link
+  def remove_leaf
     leaf_id = params[:leaf_id]
-    Rails.logger.info "[DEBUG INFO] ############## TreeController - remove_link - leaf_id = #{leaf_id} ##############"
+    Rails.logger.info "[DEBUG INFO] ############## TreeController - remove_leaf - leaf_id = #{leaf_id} ##############"
 
-    if @tree.leaf_exists(leaf_id)
+    if @tree.leaf_exists leaf_id
+      leaf = Leaf.find(leaf_id)
+      msg = {
+          data: {
+              title: "Follow Branch - leaf removed",
+              body: "leaf '#{leaf.name}' was just removed from branch '#{leaf.branch.category.name}'"
+          }
+      }
+      leaf.branch.notify_followers msg
+
       Leaf.destroy(leaf_id)
     else
       Rails.logger.info "[DEBUG INFO] leaf '#{leaf_id}' dose not exists"
@@ -157,12 +153,12 @@ class TreeController < ApplicationController
     render_tree
   end
 
-  def update_link
+  def update_leaf
     leaf_id = params[:leaf_id]
     link_name = params[:link_name]
     link_url = params[:link_url]
     link_category_id = params[:link_category_id]
-    Rails.logger.info "[DEBUG INFO] ############## TreeController - update_link - leaf_id = #{leaf_id} - new link_name = #{link_name}, new link_url = #{link_url}, new link_category_id = #{link_category_id}##############"
+    Rails.logger.info "[DEBUG INFO] ############## TreeController - update_leaf - leaf_id = #{leaf_id} - new link_name = #{link_name}, new link_url = #{link_url}, new link_category_id = #{link_category_id}##############"
 
     if @tree.leaf_exists(leaf_id)
       link = Link.create_if_not_exists(link_url, link_category_id, nil)
@@ -180,8 +176,7 @@ class TreeController < ApplicationController
     Rails.logger.info "[DEBUG INFO] ############## TreeController - suggest_branch - url = #{link_url}"
     cats = Link.suggest_categories(link_url)
 
-
-    if (cats.first)
+    if cats.first.present?
       category = Category.find(cats.first.first)
       Rails.logger.info "[DEBUG INFO] ############## TreeController - suggest_branch - done - category_id = #{category.id} - name = #{category.name}"
       render json: category
@@ -193,9 +188,10 @@ class TreeController < ApplicationController
 
   private
 
-    def notify_tree(msg)
+    def notify_user(msg)
       # WebsocketRails[:tree].trigger 'update', msg
-      WebsocketRails.users[current_user.id].send_message :update, msg, :namespace => :tree
+      # WebsocketRails.users[current_user.id].send_message :update, msg, :namespace => :tree
+      NotificationsController.notify_user(current_user.id, msg)
     end
 
     def render_tree
@@ -211,5 +207,29 @@ class TreeController < ApplicationController
           }
         }
       )
+    end
+
+    def create_leaf(link, link_name)
+      leaf = @tree.leaf_link(link, link_name)
+
+      if leaf.present?
+        category_name = Category.find(link.category_id)[:name]
+
+        msg = {
+            data: {
+                title: 'Tree Update',
+                body: "Leaf '#{link_name}' added to '#{category_name}' on your tree"
+            }
+        }
+        notify_user msg
+
+        msg = {
+            data: {
+                title: "Follow Branch - leaf added",
+                body: "leaf '#{leaf.name}' was just added to branch '#{leaf.branch.category.name}'"
+            }
+        }
+        leaf.branch.notify_followers msg
+      end
     end
 end
