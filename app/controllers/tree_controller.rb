@@ -85,6 +85,9 @@ class TreeController < ApplicationController
     link_url = params[:link_url]
     link_category_id = params[:link_category_id]
     link_img = params[:link_img]
+
+    success = true
+    leaf = nil
     Rails.logger.info "[DEBUG INFO] ############## TreeController - create_new_link - link_name = #{link_name}, link_url = #{link_url}, link_category_id = #{link_category_id} ##############"
     # ix =open('http://cdn.sstatic.net/stackoverflow/img/favicon.ico')
     #  ii = open('http://cdn.sstatic.net/stackoverflow/img/favicon.ico', &:read)
@@ -96,24 +99,39 @@ class TreeController < ApplicationController
 
     if link_name.blank? or link_url.blank? or link_category_id.blank?
       Rails.logger.info "[DEBUG INFO] blank param"
-      return render_tree
+      # return render_tree
+      success = false
+    else
+      options = {
+          :link_favicon_url => link_img
+      }
+
+      link = Link.create_if_not_exists(link_url, link_category_id, options)
+      leaf = create_leaf(link, link_name)
     end
 
-    options = {
-        :link_favicon_url => link_img
-    }
-
-    link = Link.create_if_not_exists(link_url, link_category_id, options)
+    # options = {
+    #     :link_favicon_url => link_img
+    # }
+    #
+    # link = Link.create_if_not_exists(link_url, link_category_id, options)
 
 
     # linkImg = Base64.encode64(open(link_img){ |io| io.read })
     # src="data:image/png;base64,AAABA...."
 
-    leaf = create_leaf(link, link_name)
+    # leaf = create_leaf(link, link_name)
 
 
-    Rails.logger.info "[DEBUG INFO] tree = #{leaf.blank?}"
-    render_tree
+    # Rails.logger.info "[DEBUG INFO] leaf.blank = #{leaf.blank?}"
+    # render_tree
+
+    response = {
+        :success => success,
+        :leaf => leaf
+    }
+
+    render json: response.as_json
   end
 
   def add_link
@@ -231,5 +249,7 @@ class TreeController < ApplicationController
         }
         leaf.branch.notify_followers msg
       end
+
+      leaf
     end
 end

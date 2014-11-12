@@ -100,11 +100,20 @@ ctrls.controller 'MyController',
         $scope.reset_tree(tree)
 
     $scope.save_link = ()->
-      Services.create_link($scope.tree.id, $scope.linkName, $scope.linkUrl, $scope.linkCategoryID).then (tree)->
-        $scope.linkName = '';
-        $scope.linkCategoryID = 1;
-        $scope.linkUrl = '';
-        $scope.reset_tree(tree)
+      Services.create_link($scope.tree.id, $scope.linkName, $scope.linkUrl, $scope.linkCategoryID).then (response)->
+        if response.success
+          new_leaf = response.leaf
+
+          parent_branch = $scope.get_branch_by_category_id($scope.linkCategoryID)
+
+          parent_branch.leafs.push(new_leaf)
+
+          $scope.linkName = '';
+          $scope.linkCategoryID = 1;
+          $scope.linkUrl = '';
+
+          $scope.reset_tree($scope.myTree)
+#        $scope.reset_tree(tree)
 
     $scope.delete_link = (leafID)->
       Services.delete_link($scope.tree.id, leafID).then (tree)->
@@ -427,6 +436,8 @@ ctrls.controller 'FoldersController',
 
     $scope.set_current_branch = (branch_id)->
       branch = $scope.get_branch_by_id(branch_id)
+      $('#new-branch-container').hide()
+      $('#new-leaf-container').hide()
       console.log(branch)
       $scope.path.push(branch)
       $scope.currentBranch = branch
@@ -441,9 +452,7 @@ ctrls.controller 'FoldersController',
     $scope.show_new_branch_input = ()->
       $('#new-leaf-container').hide()
       $('#new-branch-container').show()
-
       $('#new-branch-name').focus();
-#      $('#new-branch-name').setSelectionRange(0, 0);
       return false
 
     $scope.show_new_leaf_input = ()->
@@ -453,11 +462,30 @@ ctrls.controller 'FoldersController',
       return false
 
     $scope.add_branch = ()->
-
+      categoryName = $('#new-branch-name').val()
+      Services.create_category($scope.tree.id, categoryName, $scope.currentBranch.category.id).then (response)->
+        console.log(response)
+        if response.success
+          new_branch = response.branch
+          $scope.tree.branches.push(new_branch)
+          $scope.currentBranch.branches.push(new_branch)
+          $('#new-branch-name').val('')
+        $('#new-branch-container').hide()
+        $('#new-leaf-container').hide()
       return false
 
-    $scope.add_leaf = (x)->
-      console.log(x)
+    $scope.add_leaf = ()->
+      linkName = $('#new-leaf-name').val()
+      linkUrl = $('#new-leaf-url').val()
+      Services.create_link($scope.tree.id, linkName, linkUrl, $scope.currentBranch.category.id).then (response)->
+        console.log(response)
+        if response.success
+          new_leaf = response.leaf
+          $scope.currentBranch.leafs.push(new_leaf)
+          $('#new-leaf-name').val('')
+          $('#new-leaf-url').val('')
+        $('#new-branch-container').hide()
+        $('#new-leaf-container').hide()
       return false
 
     $scope.initialize()

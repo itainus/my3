@@ -5,8 +5,8 @@ angular.module('Mytree.services', ['ngResource'])
       $http.get('/home/trees').then (resp) ->
         return resp.data
 
-    create_category: (tree_id, name, parent_id) ->
-      $http.post('/tree/' + tree_id + '/category_create', {category_name: name, category_parent_id: parent_id}).then (resp) ->
+    create_category: (tree_id, name, category_parent_id) ->
+      $http.post('/tree/' + tree_id + '/category_create', {category_name: name, category_parent_id: category_parent_id}).then (resp) ->
         return resp.data
 
     add_category: (tree_id, category_id) ->

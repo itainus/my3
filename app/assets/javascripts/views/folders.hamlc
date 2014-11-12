@@ -7,17 +7,26 @@
         %i
           {{branch.category.name}}
   %br
-  -##folder-actions
+
+  -#.row
+  -#  .col-lg-6
+  -#    .input-group
+  -#      %span.input-group-addon
+  -#        %input{:type=>"checkbox"}
+  -#          hide
+  -#      %input.form-control{:type=>"text"}
+
+  #folder-actions
     %a{'href' => '', 'ng-click'=>"show_new_branch_input()"}
       Add Branch
     |
     %a{'href' => '', 'ng-click'=>"show_new_leaf_input()"}
       Add Leaf
   %br
-  .col-md-12{:style => "height: 370px; overflow:auto;"}
+  .col-md-12
     %table.table
       %tbody
-        -#%tr#new-branch-container{:style => 'display: none;'}
+        %tr#new-branch-container{:style => 'display: none;'}
           %td
             .input-group.col-md-12
               %span.input-group-addon
@@ -25,8 +34,8 @@
               %input#new-branch-name.form-control{:type=>"text", placeholder: "Category Name" }
                 %span.input-group-btn
                   %button.btn.btn-default{:type=>"button", 'ng-click' => 'add_branch()'}
-                    Create Branch
-        -#%tr#new-leaf-container{:style => 'display: none;'}
+                    Add Branch
+        %tr#new-leaf-container{:style => 'display: none;'}
           %td
             .input-group.col-md-6
               %span.input-group-addon
@@ -36,7 +45,7 @@
               %input#new-leaf-url.form-control{:type=>"text", placeholder: "Link Url" }
                 %span.input-group-btn
                   %button.btn.btn-default{:type=>"button", 'ng-click' => 'add_leaf()'}
-                    Create Leaf
+                    Add Leaf
         %tr{'ng-repeat' => "branch in currentBranch.branches"}
           %td
             %button.btn.btn-sm.btn-primary{'ng-click'=>"set_current_branch(branch.id)"}
