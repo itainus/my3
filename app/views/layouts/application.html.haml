@@ -31,6 +31,7 @@
                 |
               = link_to "Logout", destroy_user_session_path, :method => :delete, :class => 'navbar-link'
               = link_to "Friends", '#/friends', :method => :get, :class => 'navbar-link', :style => 'margin-left: 100px;'
+              = link_to "Folders", '#/folders', :method => :get, :class => 'navbar-link', :style => 'margin-left: 100px;'
             - else
               = link_to "Sign up", new_user_registration_path, :class => 'navbar-link'
               :plain

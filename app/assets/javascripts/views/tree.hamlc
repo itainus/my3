@@ -23,6 +23,7 @@
 
 
 != JST['views/new_category']()
+!= JST['views/edit_category']()
 != JST['views/new_link']()
 != JST['views/edit_link']()
 

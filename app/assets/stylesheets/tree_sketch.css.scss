@@ -40,6 +40,10 @@ button {
 //  height: 25px;
 }
 
+#tree-canvas.zoom-in {
+  cursor: -webkit-zoom-out;
+}
+
 #tree-canvas-stats-btn {
   opacity: 0.0;
 }

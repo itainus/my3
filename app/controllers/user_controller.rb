@@ -1,6 +1,6 @@
 class UserController < ApplicationController
-  def all_users
-    Rails.logger.info "[DEBUG INFO] ############## UserController - all_users ##############"
+  def all_others
+    Rails.logger.info "[DEBUG INFO] ############## UserController - all_others ##############"
 
     # render json: User.all.as_json(only: [:id, :email])
     render json: User.where.not(id: current_user.id).as_json(only: [:id, :email])

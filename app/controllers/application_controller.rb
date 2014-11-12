@@ -7,6 +7,9 @@ class ApplicationController < ActionController::Base
   after_filter :set_csrf_cookie_for_ng
 
   config.relative_url_root = ""
+  # :debug, :info, :warn, :error, :fatal
+  # 0, 1, 2, 3 ,4
+  ActiveRecord::Base.logger.level = 1
 
   def set_csrf_cookie_for_ng
     cookies['XSRF-TOKEN'] = form_authenticity_token if protect_against_forgery?

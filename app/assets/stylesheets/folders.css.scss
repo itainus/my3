@@ -1,0 +1,32 @@
+// Place all the styles related to the home controller here.
+// They will automatically be included in application.css.
+// You can use Sass (SCSS) here: http://sass-lang.com/
+
+//::-webkit-input-placeholder {
+//  color: #428bca !important;
+//}
+//
+//:-moz-placeholder { /* Firefox 18- */
+//  color: #428bca !important;
+//}
+//
+//::-moz-placeholder {  /* Firefox 19+ */
+//  color: #428bca !important;
+//}
+//
+//:-ms-input-placeholder {
+//  color: #428bca !important;
+//}
+
+#new-branch-name,
+#new-leaf-name,
+#new-leaf-url {
+  color: #3071a9;
+}
+
+.input-group-addon {
+  background-image: linear-gradient(to bottom, #428bca 0%, #3071a9 100%);
+  background-repeat: repeat-x;
+  border-color: 1px solid #cccccc;
+  color: #ffffff;
+}

@@ -1,5 +1,34 @@
 ctrls = angular.module('Mytree.controllers',[])
 
+window.websocket_dispatcher = null
+
+create_notification = (template, vars, opts)->
+  $("#notifications-container").notify("create", template, vars, opts);
+
+init_websocket = ()->
+  if window.websocket_dispatcher
+    console.log 'window.websocket_dispatcher already defined'
+    return
+  port = if location.port == '' then '' else (':' + location.port)
+  websocket_endpoint = document.domain + port + '/websocket'
+  window.websocket_dispatcher = new WebSocketRails(websocket_endpoint)
+  window.websocket_dispatcher.on_open = (data) ->
+    console.log "Connection has been established:", data
+  window.websocket_dispatcher.on_close = (data) ->
+    console.log "Connection has been closed: ", data
+    window.websocket_dispatcher = new WebSocketRails(websocket_endpoint)
+
+  window.websocket_dispatcher.bind 'user.notifications', (notification) =>
+    console.log 'user.notifications bind response:', notification
+    $("#notifications-container").notify()
+    msg = {
+      title:notification.data.title,
+      text:notification.data.body
+    }
+    create_notification("sticky", msg, { expires:false });
+
+init_websocket()
+
 ctrls.controller 'MyController',
   ($scope, Services, TreeSketch)->
 
@@ -31,18 +60,14 @@ ctrls.controller 'MyController',
       $scope.myTree = tree
       $scope.sketch_tree()
 
-    $scope.sketch_tree = (filter, trunk)->
-      branches = $scope.tree.branches
-
+    $scope.sketch_tree = (filter_by, trunk)->
+      $scope.filterBy = if filter_by then filter_by else null
+      $scope.zoomBranch = if trunk then trunk else null
       tree = {}
-      tree.branches = branches
+      tree.branches = $scope.tree.branches
       tree.trunk = if trunk then trunk else $scope.get_branch_by_category_id(1);
-      tree.trunk.angle = if trunk then trunk.angle else 90
-#      tree.trunk.len = if trunk then trunk.len else 250
-
-      tree.filter = !!filter
-
-      return TreeSketch.drawTree(tree)
+#      tree.trunk.angle = if trunk then trunk.angle else 90
+      return TreeSketch.draw_tree(tree, filter_by, $scope)
 
     $scope.save_category = ()->
       Services.create_category($scope.tree.id, $scope.categoryName, $scope.categoryParentID).then (response)->
@@ -107,23 +132,36 @@ ctrls.controller 'MyController',
         $scope.linkUrl = ""
         $scope.linkCategoryID = ""
 
+    $scope.set_edit_category_fields = (branch)->
+      if (branch)
+        $scope.categoryName = branch.category.name
+        $scope.categoryParentID = branch.category.category_id
+        $scope.branchID = branch.id
+      else
+        $scope.categoryName = ""
+        $scope.categoryParentID = ""
+        $scope.branchID = ""
+
     $scope.set_friends = ()->
       Services.get_friends().then (friends)->
         $scope.friends = friends
 
     $scope.show_friend_tree = ()->
       if $scope.friend
-        $scope.tree = $scope.friend.trees[0]
-        $("#new-category-btn").attr("disabled", "disabled");
-        $("#new-link-btn").attr("disabled", "disabled");
-        $("#tree-canvas-stats").show();
+        Services.get_friend_trees($scope.friend.id).then (friend)->
+          if friend.id == $scope.friend.id
+            $scope.friend.trees = friend.trees
+            $scope.tree = $scope.friend.trees[0]
+            $("#new-category-btn").attr("disabled", "disabled");
+            $("#new-link-btn").attr("disabled", "disabled");
+            $("#tree-canvas-stats").show();
+            $scope.sketch_tree()
       else
         $scope.tree = $scope.myTree
         $("#new-category-btn").attr("disabled", null);
         $("#new-link-btn").attr("disabled", null);
         $("#tree-canvas-stats").hide();
-
-      $scope.sketch_tree()
+        $scope.sketch_tree()
       return
 
     $scope.is_mytree = ()->
@@ -207,17 +245,19 @@ ctrls.controller 'MyController',
         if (action == 'follow')
           $scope.follow_branch(branch.id)
         if (action == 'edit')
-          $scope.edit_category(statID)
+          $scope.add_branch_to_mytree(branch)
+          angular.element('#editCategory').modal('show');
         if (action == 'delete')
           $scope.delete_category(statID)
         if (action == 'zoom')
-          console.log(branch)
-          $scope.sketch_tree(false, branch)
-
+#          $scope.sketch_tree(branch)
+          $scope.zoomBranch = branch
+          $("#tree-canvas").addClass("zoom-in");
+          $scope.sketch_tree($scope.filterBy, branch)
 
     $scope.filter_tree = (el) ->
-      console.log($scope.filterBy)
-      q = $scope.filterBy
+
+      return $scope.sketch_tree($scope.filterBy, $scope.zoomBranch)
 
       if (!q)
         $scope.sketch_tree(false)
@@ -249,93 +289,21 @@ ctrls.controller 'MyController',
             len++
             tb.keep = true
             break
-      $scope.sketch_tree(true)
-
-      return true
-
-    $scope.create_notification = (template, vars, opts)->
-      $("#notifications-container").notify("create", template, vars, opts);
-
-    $scope.init_websocket = ()->
-      if document.websocket_dispatcher_init
-        return
-
-      if $scope.websocket_dispatcher
-        return
-      port = if location.port == '' then '' else (':' + location.port)
-      websocket_endpoint = document.domain + port + '/websocket'
-      $scope.websocket_dispatcher = new WebSocketRails(websocket_endpoint)
-      $scope.websocket_dispatcher.on_open = (data) ->
-        console.log "Connection has been established:", data
-        document.websocket_dispatcher_init = true
-      $scope.websocket_dispatcher.on_close = (data) ->
-        console.log "Connection has been closed: ", data
-        window.websocket_dispatcher = new WebSocketRails(websocket_endpoint)
-
-
-      $scope.websocket_dispatcher.bind 'user.notifications', (notification) =>
-        console.log 'user.notifications bind response:', notification
-        $("#notifications-container").notify()
-        msg = {
-          title:notification.data.title,
-          text:notification.data.body
-        }
-        $scope.create_notification("sticky", msg, { expires:false });
-
-#      $scope.websocket_dispatcher.bind 'tree.update', (response) =>
-#        console.log 'tree.update bind response:', response
-#        $("#notifications-container").notify()
-#        msg = {
-#          title:response.data.title,
-#          text:response.data.body
-#        }
-#        $scope.create_notification("sticky", msg, { expires:false });
-#        $scope.initialize()
-
-#      $scope.websocket_dispatcher.bind 'friend.status', (response) =>
-#        console.log 'friend.status bind response:', response
-#        $("#notifications-container").notify()
-#        msg = {
-#          title:response.data.title,
-#          text:response.data.body
-#        }
-#        $scope.create_notification("sticky", msg, { expires:false });
-
-#      $scope.websocket_dispatcher.bind 'follow.branch', (response) =>
-#        console.log 'follow.branch bind response:', response
-#        $("#notifications-container").notify()
-#        msg = {
-#          title:response.data.title,
-#          text:response.data.body
-#        }
-#        $scope.create_notification("sticky", msg, { expires:false });
-
-#      private_channel = $scope.websocket_dispatcher.subscribe_private 'tree'
-#      private_channel.on_success = (current_user) =>
-#        console.log( current_user.email + " Has joined the channel");
-#      private_channel.on_failure = (reason) =>
-#        console.log "Authorization failed" , reason;
-#      private_channel.bind 'update', (response) =>
-#        console.log 'tree.update subscribe_private channel response:', response
-#        $("#notifications-container").notify()
-#        $scope.create_notification("sticky", { title:'tree.update - channel', text:'Example of a default notification.  I will not fade out after 5 seconds'},{ expires:false });
+      return $scope.sketch_tree(true)
 
     $scope.initialize()
-    $scope.init_websocket()
-
-
-
 
 
 ctrls.controller 'FriendsController',
   ($scope, Services)->
     $scope.initialize = ()->
       console.log('FriendsController')
-      Services.get_all_users().then (users)->
+      console.log(ctrls)
+
+      Services.get_all_other_users().then (users)->
 #        console.log(users)
         $scope.users = users
         Services.get_friends().then (friends)->
-#          console.log(friends)
           $scope.friends = friends
 
     $scope.is_friend = (userID)->
@@ -426,3 +394,70 @@ ctrls.controller 'FriendsController',
 
     $scope.initialize()
 #    $scope.init_websocket()
+
+ctrls.controller 'FoldersController',
+  ($scope, Services)->
+    $scope.initialize = ()->
+      console.log('FoldersController')
+
+      $scope.currentBranch = null
+      $scope.path = []
+
+      Services.get_trees().then (trees)->
+        $scope.tree = trees[0];
+        for branch in $scope.tree.branches
+          if branch.category.category_id == null
+            $scope.path.push(branch)
+            $scope.currentBranch = branch
+            break
+
+        console.log $scope.currentBranch
+
+#      $scope.path = ['a', 'c', 'd', 'e']
+#      $scope.items = [{name: "A"},{name: "B"},{name: "Z"},{name: "C"},{name: "D"},{name: "E"},]
+
+    $scope.on_path_click = (branch_id)->
+      console.log(branch_id)
+      tmpPath = []
+      for branch in $scope.path
+        if branch.id == branch_id
+          $scope.path = tmpPath
+          return $scope.set_current_branch(branch_id)
+        tmpPath.push(branch)
+
+    $scope.set_current_branch = (branch_id)->
+      branch = $scope.get_branch_by_id(branch_id)
+      console.log(branch)
+      $scope.path.push(branch)
+      $scope.currentBranch = branch
+      return true
+
+    $scope.get_branch_by_id = (branch_id)->
+      for branch in $scope.tree.branches
+        if branch.id == branch_id
+          return branch
+      return null
+
+    $scope.show_new_branch_input = ()->
+      $('#new-leaf-container').hide()
+      $('#new-branch-container').show()
+
+      $('#new-branch-name').focus();
+#      $('#new-branch-name').setSelectionRange(0, 0);
+      return false
+
+    $scope.show_new_leaf_input = ()->
+      $('#new-branch-container').hide()
+      $('#new-leaf-container').show()
+      $('#new-leaf-name').focus();
+      return false
+
+    $scope.add_branch = ()->
+
+      return false
+
+    $scope.add_leaf = (x)->
+      console.log(x)
+      return false
+
+    $scope.initialize()

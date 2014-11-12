@@ -20,7 +20,6 @@
             %label.col-sm-3.control-label{for: "link-category-form"} Category
             .col-sm-8
               %select#category-parent-form.form-control1{'ng-model' => "linkCategoryID", 'ng-options' => "branch.category.id as branch.category.name for branch in tree.branches", :style => "display: inline-block;"}
-                -#!= JST['views/select_categories']()
               %button.btn.btn-sm.btn-primary{"ng-click" => "toggle_new_link_modal('editLink')"}
                 %i.fa.fa-plus
       .modal-footer

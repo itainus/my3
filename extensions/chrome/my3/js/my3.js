@@ -162,8 +162,9 @@ var My3 = {
 	}
 };
 
+var loadMy3 = function () {
 
-document.addEventListener('DOMContentLoaded', function () {
+    alert("in loadMy3()");
 
     My3.init();
 
@@ -252,4 +253,18 @@ document.addEventListener('DOMContentLoaded', function () {
 //        return false;
 //    });
 
+};
+
+
+document.addEventListener('DOMContentLoaded', loadMy3);
+
+chrome.runtime.onMessage.addListener(
+function(req, sender, sendResponse) {
+   alert("req");
+    alert(req);
+
+    if (req.details) {
+        var details = req.details;
+
+    }
 });

@@ -13,10 +13,10 @@ Rails.application.routes.draw do
   # post "tree/category_create"
 
   get "home/trees" => "home#trees"
-  get "home/friends" => "home#friends"
+  # get "home/friends" => "home#friends"
   get "home/test" => "home#test"
 
-  get  "user/all" => "user#all_users"
+  get  "user/all_others" => "user#all_others"
   post "user/branch_follow" => "user#follow_branch"
   # get "users/sign_out" => "user#destroy_user_session"
 
@@ -34,8 +34,9 @@ Rails.application.routes.draw do
   post "tree/:id/link_update" => "tree#update_leaf"
 
   get  "friends" => "friend#index"
-  post "friends/add" => "friend#add_friend"
-  post "friends/delete" => "friend#delete_friend"
+  get  "friend/:id/trees" => "friend#trees"
+  post "friend/add" => "friend#add_friend"
+  post "friend/delete" => "friend#delete_friend"
 
   get  'notifications' => 'notifications#index'
   get  'notifications/admin' => 'notifications#admin'

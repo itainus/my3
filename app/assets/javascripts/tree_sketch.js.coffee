@@ -4,8 +4,9 @@
 angular.module('Mytree.treeSketch', ['ngResource'])
   .factory 'TreeSketch', ($http, $q) ->
 
-    canvas = 0
-    tipCanvas = 0
+    $scope = null
+    canvas = null
+    tipCanvas = null
     ctx = 0
     W = 0
     H = 0
@@ -18,23 +19,22 @@ angular.module('Mytree.treeSketch', ['ngResource'])
     m_leafs = {}
     t = {}
 
-    drawTree: (tree) ->
+    draw_tree: (tree, filter, scope) ->
       console.log ("drawing tree...")
       console.log 'tree', tree
 
+      $scope = scope
       t = this
-      m_branches = {}
-      m_leafs = {}
-      t.filter = tree.filter
-      branches = tree.branches
 
       canvas = document.getElementById("tree-canvas");
       tipCanvas = document.getElementById("tip-canvas");
 
       $('#tree-canvas').unbind('mousemove');
       $('#tree-canvas').bind('mousemove', t.onCanvasHover);
+      $('#tree-canvas').unbind('click');
+      $('#tree-canvas').bind('click', t.onCanvasClick);
       $('#tip-canvas').unbind('click');
-      $('#tip-canvas').bind('click', t.onCanvasClick);
+      $('#tip-canvas').bind('click', t.onTipCanvasClick);
       $('#tip-canvas').hide()
 
       ctx = canvas.getContext("2d");
@@ -45,21 +45,37 @@ angular.module('Mytree.treeSketch', ['ngResource'])
       W = canvas.width; #window.innerWidth;
       H = canvas.height;#400; #window.innerHeight;
 
-      m_leafs = {}
-      m_branches = {}
-      m_branches[tree.trunk.id] = tree.trunk
-
-      for b in branches
-        if (!t.filter)
-          b.keep = false
-        m_branches[b.id] = b
-
+      tree.trunk.angle = if tree.trunk.angle then tree.trunk.angle else 90
       tree.trunk.rank = 0
+
+      t.init_branches(tree, filter)
       t.set_branches_rank(tree.trunk)
       t.set_branches_weight(tree.trunk)
 #      console.log('m_branches', m_branches)
 
       return t.init(tree.trunk)
+
+    init_branches: (tree, filter) ->
+      m_leafs = {}
+      m_branches = {}
+      for b in tree.branches
+        m_branches[b.id] = b
+      t.keep_branch(tree.trunk, filter)
+      m_branches[tree.trunk.id] = tree.trunk
+
+    keep_branch: (trunk, filter) ->
+      trunk.keep = !filter
+      for leaf in trunk.leafs
+        leaf.keep = !filter
+        if (leaf.link.url.indexOf(filter) != -1)
+          leaf.keep = true
+        trunk.keep |= leaf.keep
+      for b in trunk.branches
+        branch = m_branches[b.id]
+        branch.keep = !filter
+        t.keep_branch(branch, filter)
+        trunk.keep |= branch.keep
+      return trunk.keep
 
     init: (trunk) ->
 #      console.log 'trunk', trunk
@@ -81,15 +97,22 @@ angular.module('Mytree.treeSketch', ['ngResource'])
       #empty the start points on every init();
       start_points = [];
 
-      trunk_min_length = 200
-      trunk_length = trunk_min_length
+      if !trunk.min_length
+        trunk.min_length = 0
+
+      if !trunk.length
+        trunk.length = 0
+        trunk.reduction = 1
+
+      trunk_min_length = Math.max(trunk.min_length, 200)
+      trunk_length = Math.max(trunk.length / trunk.reduction, trunk_min_length)
 
       sp = {x: W/2, y: 20}
       ep = t.get_endpoint(sp.x, sp.y, trunk.angle, trunk_length);
 
       ep.id = trunk.id;
 
-      trunk.keep = true
+#      trunk.keep = true
       trunk.min_length = trunk_min_length
       trunk.length = trunk_length
       trunk.width = line_width
@@ -127,7 +150,6 @@ angular.module('Mytree.treeSketch', ['ngResource'])
         i = 1
         for b in branches
           branch = m_branches[b.id]
-#          only_leafs = (branch.branches.length == 0)
           only_leafs = (branch.branches.length == 0) and (branch.leafs.length < 4)
 
           branch_min_length = parent_branch.min_length * reduction
@@ -150,11 +172,12 @@ angular.module('Mytree.treeSketch', ['ngResource'])
           branch.spY = H - sp.y
           branch.epX = ep.x
           branch.epY = H - ep.y
+          branch.reduction = reduction
 
-          console.log 'branch', branch.id , branch.category.name + ' - weight = ' + branch.weight + ' - rank = ' + branch.rank + ' - angle = ' + branch.angle + ' - width = ' + branch.width + ' - from ('  + branch.spX + ',' + branch.spY  + ') to (' + branch.epX + ',' + branch.epY+')'
+#          if branch.keep
+#            console.log 'branch', branch.id , branch.category.name + ' - keep = ' + branch.keep + ' - weight = ' + branch.weight + ' - rank = ' + branch.rank + ' - angle = ' + branch.angle + ' - width = ' + branch.width + ' - from ('  + branch.spX + ',' + branch.spY  + ') to (' + branch.epX + ',' + branch.epY+')'
 
-          if (!t.filter || branch.keep)
-            branch.keep = true
+          if (branch.keep)
             ctx.beginPath();
             ctx.fillStyle = 'brown';
             ctx.strokeStyle = "brown";
@@ -173,8 +196,7 @@ angular.module('Mytree.treeSketch', ['ngResource'])
       if (new_start_points.length)
         setTimeout(t.branches, 50);
       else
-        console.log 't.name_branches()'
-        #t.name_branches()
+        t.name_branches()
       return
 
     leafs: (branch) ->
@@ -197,10 +219,12 @@ angular.module('Mytree.treeSketch', ['ngResource'])
         leaf.sp = leaf_sp
         leaf.ep = leaf_ep
 
-#        console.log 'leaf', leaf.id , leaf.name + ' - angle = ' + leaf_angle + ' - from ('  + leaf.sp.x + ',' + (H - leaf.sp.y)  + ') to (' + leaf.ep.x + ',' + (H - leaf.ep.y) + ')'
+#        if leaf.keep
+#          console.log 'leaf', leaf.id ,  leaf.name + ' - keep = ' + leaf.keep + ' - angle = ' + leaf_angle + ' - from ('  + leaf.sp.x + ',' + (H - leaf.sp.y)  + ') to (' + leaf.ep.x + ',' + (H - leaf.ep.y) + ')'
 
-        if (!t.filter || leaf.keep)
-          leaf.keep = true
+#        if (!t.filter || leaf.keep)
+#          leaf.keep = true
+        if (leaf.keep)
           m_leafs[leaf.id] = leaf
           img = new Image();
 
@@ -222,9 +246,9 @@ angular.module('Mytree.treeSketch', ['ngResource'])
             ctx.stroke();
 
     name_branches: () ->
+      return false
       for k,branch of m_branches
         if branch.keep
-
           if branch.angle > 90
             x = branch.epX
             y = branch.epY
@@ -351,10 +375,14 @@ angular.module('Mytree.treeSketch', ['ngResource'])
       return null
 
     onCanvasClick: (e) ->
+      console.log e.currentTarget.id
+      e.stopPropagation()
+      if $("#tree-canvas").hasClass("zoom-in")
+        $("#tree-canvas").removeClass("zoom-in")
+        $scope.sketch_tree()
+
+    onTipCanvasClick: (e) ->
       pt = t.getMouse(e, canvas);
-
-      console.log(e)
-
       name = ''
       id = 0;
       type = ''
@@ -362,35 +390,20 @@ angular.module('Mytree.treeSketch', ['ngResource'])
 
       e.stopPropagation()
 
-#      if (e.currentTarget.id == 'tip-canvas')
-#        showMenu = true
-#        type = $('#tree-canvas-stats-menu').attr('data-stats-type')
-#        id = $('#tree-canvas-stats-menu').attr('data-stats-id')
-
-#      console.log 'leaf-click', pt.x, pt.y
-
       l = t.getLeafByPoint(pt.x, pt.y)
       if l
-
         name = l.name
         id = l.id
         type = 'leaf'
         $('.branch-action').hide()
         $('.leaf-action').show()
-
-#        $('#tree-canvas-stats-zoom').hide()
         $('#tree-canvas-stats-goto').attr("href", l.link.url);
-#        $('#tree-canvas-stats-goto').show()
         showMenu = true
       else
-#        console.log('point clicked = (' + pt.x + ',' + pt.y + ')')
         b = t.getBranchByPoint(pt.x, pt.y)
         if b
           $('.leaf-action').hide()
           $('.branch-action').show()
-
-#          $('#tree-canvas-stats-goto').hide()
-#          $('#tree-canvas-stats-zoom').show()
           name = b.category.name
           id = b.id
           type = 'branch'
@@ -400,6 +413,7 @@ angular.module('Mytree.treeSketch', ['ngResource'])
         $('#tip-canvas').addClass('open')
         $('#tree-canvas-stats-menu').attr('data-stats-type', type)
         $('#tree-canvas-stats-menu').attr('data-stats-id', id)
+
       return
 
     onCanvasHover: (e) ->

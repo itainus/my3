@@ -1,19 +1,25 @@
 {
-  "manifest_version": 5,
+  "manifest_version": 6,
 
   "name": "My3",
   "description": "My3 add link",
-  "version": "1.5",
+  "version": "1.6",
 
   "browser_action": {
-    "default_icon": "tree.png",
+    "default_icon": "images/tree.png",
     "default_popup": "popup.html"
   },
+    "background": {
+        "persistent": false,
+        "scripts": ["js/background.js"]
+    },
+    "icons": {"128": "images/tree.png"},
   "permissions": [
     "tabs",
     "cookies",
     "http://my-3.herokuapp.com/",
-    "http://localhost:3000/"
+    "http://localhost:3000/",
+    "contextMenus"
   ]
 
 }

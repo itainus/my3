@@ -8,6 +8,7 @@ class FriendController < ApplicationController
   end
 
   def index
+    render_friends
   end
 
   def add_friend
@@ -36,28 +37,6 @@ class FriendController < ApplicationController
       }
 
       notify_friend(friend_id, msg)
-
-
-      # Rails.logger.info No.controller_name
-      #
-      # WebsocketRails.send_message :status,{} , :namespace => :friend
-      #
-      # if controller_store[friend_id].present?
-      #   Rails.logger.info "[DEBUG INFO] connection of user_id = #{friend_id} exists"
-        # response = {:friend => current_user[:email], :action => 'add'}
-        # connection = controller_store[friend_id]
-      #   # connection.send_message :status,response , :namespace => :friend
-      # else
-      #   Rails.logger.info "[DEBUG INFO] no connection of user_id = #{friend_id} exists"
-      # end
-
-      #  Rails.logger.info "[DEBUG INFO] ws_connection s"
-      # Rails.logger.info NotificationsController.number_of_foos.as_json
-      # # Rails.logger.info current_user[:ws_connection]
-      # Rails.logger.info "[DEBUG INFO] ws_connection e"
-
-
-
     end
 
     render_friends
@@ -78,6 +57,18 @@ class FriendController < ApplicationController
     render_friends
   end
 
+  def trees
+    friend_id = params[:id]
+    friend = current_user.friends.find(friend_id)
+
+    if friend.present?
+      render json: friend.as_json(
+          only: [:id, :email],
+          methods: [:trees]
+      )
+    end
+  end
+
   private
 
   def notify_friend(friend_id, msg)
@@ -88,8 +79,8 @@ class FriendController < ApplicationController
 
   def render_friends
     render json: current_user.friends.as_json(
-        only: [:id, :email],
-        methods: [:trees]
+        only: [:id, :email]
+        # methods: [:trees]
     )
   end
 

@@ -41,18 +41,22 @@ angular.module('Mytree.services', ['ngResource'])
       $http.post('/tree/' + tree_id + '/link_add', {link_id: link_id, link_name: name}).then (resp) ->
         return resp.data
 
-    get_all_users: () ->
-      $http.get('/user/all').then (resp) ->
+    get_all_other_users: () ->
+      $http.get('/user/all_others').then (resp) ->
         return resp.data
 
     get_friends: () ->
-      $http.get('/home/friends').then (resp) ->
+      $http.get('/friends').then (resp) ->
         return resp.data
 
     add_friend: (user_id) ->
-      $http.post('/friends/add', {user_id: user_id}).then (resp) ->
+      $http.post('/friend/add', {user_id: user_id}).then (resp) ->
         return resp.data
 
     delete_friend: (user_id) ->
-      $http.post('/friends/delete', {user_id: user_id}).then (resp) ->
+      $http.post('/friend/delete', {user_id: user_id}).then (resp) ->
+        return resp.data
+
+    get_friend_trees: (user_id) ->
+      $http.get('/friend/' + user_id + '/trees', {}).then (resp) ->
         return resp.data

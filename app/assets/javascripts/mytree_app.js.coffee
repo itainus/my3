@@ -9,5 +9,9 @@ angular.module('mytree',['ngRoute', 'Mytree.controllers', 'Mytree.services', 'My
         template: JST['views/friends'],
         controller: 'FriendsController'
       })
+      .when('/folders', {
+        template: JST['views/folders'],
+        controller: 'FoldersController'
+      })
       .otherwise({redirectTo: '/'})
 )
