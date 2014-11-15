@@ -3,7 +3,11 @@ angular.module('mytree',['ngRoute', 'Mytree.controllers', 'Mytree.services', 'My
     $routeProvider
       .when('/', {
         template: JST['views/tree'],
-        controller: 'MyController'
+        controller: 'TreeController'
+      })
+      .when('/tree', {
+        template: JST['views/tree'],
+        controller: 'TreeController'
       })
       .when('/friends', {
         template: JST['views/friends'],

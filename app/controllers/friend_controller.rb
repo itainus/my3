@@ -79,8 +79,12 @@ class FriendController < ApplicationController
 
   def render_friends
     render json: current_user.friends.as_json(
-        only: [:id, :email]
-        # methods: [:trees]
+        only: [:id, :email],
+        include: {
+            trees: {
+                only: [:id, :name]
+            }
+        }
     )
   end
 

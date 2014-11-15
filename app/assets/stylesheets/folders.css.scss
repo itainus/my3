@@ -23,10 +23,24 @@
 #new-leaf-url {
   color: #3071a9;
 }
-//
-//.input-group-addon {
-//  background-image: linear-gradient(to bottom, #428bca 0%, #3071a9 100%);
-//  background-repeat: repeat-x;
-//  border-color: 1px solid #cccccc;
-//  color: #ffffff;
-//}
+
+#folder-actions-buttons {
+  float:right;
+}
+
+#folder-actions-buttons button{
+  background-image: linear-gradient(to bottom, #ffffff 0%, #e6e6e6 100%);
+  background-repeat: repeat-x;
+  border-color: #ccc;
+  color: black;
+}
+
+#friends-container {
+  float: right;
+}
+
+.selected-tree:focus,
+.selected-tree {
+  background: white;
+  color: #3071a9;
+}

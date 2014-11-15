@@ -13,7 +13,6 @@ Rails.application.routes.draw do
   # post "tree/category_create"
 
   get "home/trees" => "home#trees"
-  # get "home/friends" => "home#friends"
   get "home/test" => "home#test"
 
   get  "user/all_others" => "user#all_others"

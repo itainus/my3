@@ -25,14 +25,18 @@ class HomeController < ApplicationController
     render json: @trees.as_json
   end
 
-  def friends
-    Rails.logger.info "[DEBUG INFO] ############## HomeController - friends ##############"
-
-    render json: current_user.friends.as_json(
-      only: [:id, :email],
-      methods: [:trees]
-    )
-  end
+  # def friends
+  #   Rails.logger.info "[DEBUG INFO] ############## HomeController - friends ##############"
+  #
+  #   render json: current_user.friends.as_json(
+  #     only: [:id, :email],
+  #     include: {
+  #         trees: {
+  #             only: [:id, :name]
+  #         }
+  #     }
+  #   )
+  # end
 
   def generate_random_tree
     Rails.logger.info "[DEBUG INFO] ############## HomeController - test ##############"

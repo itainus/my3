@@ -29,7 +29,7 @@ init_websocket = ()->
 
 init_websocket()
 
-ctrls.controller 'MyController',
+ctrls.controller 'TreeController',
   ($scope, Services, TreeSketch)->
 
     $scope.initialize = ()->
@@ -409,21 +409,29 @@ ctrls.controller 'FoldersController',
     $scope.initialize = ()->
       console.log('FoldersController')
 
+      $scope.tree = null
+      $scope.myTree = null
       $scope.currentBranch = null
       $scope.path = []
+      $scope.friends = []
 
       Services.get_trees().then (trees)->
-        $scope.tree = trees[0];
-        for branch in $scope.tree.branches
-          if branch.category.category_id == null
-            $scope.path.push(branch)
-            $scope.currentBranch = branch
-            break
+        $scope.myTree = trees[0]
+        $scope.load_tree($scope.myTree)
 
-        console.log $scope.currentBranch
+      Services.get_friends().then (friends)->
+        $scope.friends = friends
+        console.log friends
 
-#      $scope.path = ['a', 'c', 'd', 'e']
-#      $scope.items = [{name: "A"},{name: "B"},{name: "Z"},{name: "C"},{name: "D"},{name: "E"},]
+    $scope.load_tree = (tree)->
+      $scope.path = []
+      $scope.currentBranch = null
+      $scope.tree = tree
+      for branch in $scope.tree.branches
+        if branch.category.category_id == null
+          $scope.path.push(branch)
+          $scope.currentBranch = branch
+          return
 
     $scope.on_path_click = (branch_id)->
       console.log(branch_id)
@@ -461,31 +469,47 @@ ctrls.controller 'FoldersController',
       $('#new-leaf-name').focus();
       return false
 
-    $scope.add_branch = ()->
+    $scope.create_new_branch = ()->
       categoryName = $('#new-branch-name').val()
-      Services.create_category($scope.tree.id, categoryName, $scope.currentBranch.category.id).then (response)->
-        console.log(response)
+      Services.create_category($scope.myTree.id, categoryName, $scope.currentBranch.category.id).then (response)->
         if response.success
           new_branch = response.branch
-          $scope.tree.branches.push(new_branch)
+          $scope.myTree.branches.push(new_branch)
+          $scope.tree = $scope.myTree
           $scope.currentBranch.branches.push(new_branch)
           $('#new-branch-name').val('')
         $('#new-branch-container').hide()
         $('#new-leaf-container').hide()
       return false
 
-    $scope.add_leaf = ()->
+    $scope.create_new_leaf = ()->
       linkName = $('#new-leaf-name').val()
       linkUrl = $('#new-leaf-url').val()
-      Services.create_link($scope.tree.id, linkName, linkUrl, $scope.currentBranch.category.id).then (response)->
-        console.log(response)
+      Services.create_link($scope.myTree.id, linkName, linkUrl, $scope.currentBranch.category.id).then (response)->
         if response.success
           new_leaf = response.leaf
+          $scope.tree = $scope.myTree
           $scope.currentBranch.leafs.push(new_leaf)
           $('#new-leaf-name').val('')
           $('#new-leaf-url').val('')
         $('#new-branch-container').hide()
         $('#new-leaf-container').hide()
       return false
+
+    $scope.load_my_tree = ()->
+      $('#folder-actions-buttons').show()
+      $('#folder-actions').show()
+      $scope.load_tree($scope.myTree)
+
+    $scope.load_friend_tree = (friend_id)->
+      $('#folder-actions-buttons').hide()
+      $('#folder-actions').hide()
+      Services.get_friend_trees(friend_id).then (friend)->
+        $scope.load_tree(friend.trees[0])
+
+    $scope.set_selected_button_tree = (e)->
+      $('#friends-container button').removeClass('selected-tree')
+      e.currentTarget.className += ' selected-tree'
+
 
     $scope.initialize()
