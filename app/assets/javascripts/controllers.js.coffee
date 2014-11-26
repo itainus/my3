@@ -407,11 +407,10 @@ ctrls.controller 'FriendsController',
 ctrls.controller 'FoldersController',
   ($scope, Services)->
     $scope.initialize = ()->
-      console.log('FoldersController')
-
       $scope.tree = null
       $scope.myTree = null
       $scope.currentBranch = null
+      $scope.currentLeaf = null
       $scope.path = []
       $scope.friends = []
 
@@ -433,23 +432,17 @@ ctrls.controller 'FoldersController',
           $scope.currentBranch = branch
           return
 
-    $scope.on_path_click = (branch_id)->
+    $scope.set_path_current_branch = (branch_id)->
       console.log(branch_id)
       tmpPath = []
       for branch in $scope.path
         if branch.id == branch_id
-          $scope.path = tmpPath
-          return $scope.set_current_branch(branch_id)
+          break
         tmpPath.push(branch)
-
-    $scope.set_current_branch = (branch_id)->
       branch = $scope.get_branch_by_id(branch_id)
-      $('#new-branch-container').hide()
-      $('#new-leaf-container').hide()
-      console.log(branch)
-      $scope.path.push(branch)
       $scope.currentBranch = branch
-      return true
+      $scope.path = tmpPath
+      $scope.path.push(branch)
 
     $scope.get_branch_by_id = (branch_id)->
       for branch in $scope.tree.branches
@@ -458,15 +451,23 @@ ctrls.controller 'FoldersController',
       return null
 
     $scope.show_new_branch_input = ()->
-      $('#new-leaf-container').hide()
-      $('#new-branch-container').show()
+      $('.folder-input-container').removeClass('active')
+      $('#new-branch-container').addClass('active')
       $('#new-branch-name').focus();
       return false
 
     $scope.show_new_leaf_input = ()->
-      $('#new-branch-container').hide()
-      $('#new-leaf-container').show()
+      $scope.currentLeaf = null
+      $('.folder-input-container').removeClass('active')
+      $('#new-leaf-container').addClass('active')
       $('#new-leaf-name').focus();
+      return false
+
+    $scope.show_edit_leaf_input = (leaf)->
+      $scope.currentLeaf = leaf
+      $('.folder-input-container').removeClass('active')
+      $('#edit-leaf-container').addClass('active')
+      $('#edit-leaf-name').focus();
       return false
 
     $scope.create_new_branch = ()->
@@ -478,8 +479,7 @@ ctrls.controller 'FoldersController',
           $scope.tree = $scope.myTree
           $scope.currentBranch.branches.push(new_branch)
           $('#new-branch-name').val('')
-        $('#new-branch-container').hide()
-        $('#new-leaf-container').hide()
+        $('.folder-input-container').removeClass('active')
       return false
 
     $scope.create_new_leaf = ()->
@@ -492,8 +492,61 @@ ctrls.controller 'FoldersController',
           $scope.currentBranch.leafs.push(new_leaf)
           $('#new-leaf-name').val('')
           $('#new-leaf-url').val('')
-        $('#new-branch-container').hide()
-        $('#new-leaf-container').hide()
+        $('.folder-input-container').removeClass('active')
+      return false
+
+    $scope.delete_branch = (branch_id)->
+      for parentBranch in $scope.myTree.branches  #$scope.path
+        for i, branch of parentBranch.branches
+          if branch.id == branch_id
+            Services.delete_branch($scope.myTree.id, branch_id).then (response)->
+              console.log response
+              $('.folder-input-container').removeClass('active')
+              if response.success
+                parentBranch.branches.splice(i*1, 1);
+                $scope.set_path_current_branch(parentBranch.id)
+            return true
+      return false
+
+    $scope.add_friend_branch = (branch_id)->
+      Services.add_branch($scope.myTree.id, branch_id).then (response)->
+        console.log response
+        if response.success
+          branches = response.branches
+          parentBranch = response.parentBranch
+          $scope.load_my_tree()
+          $scope.set_path_current_branch(parentBranch.id)
+        $('.folder-input-container').removeClass('active')
+      return false
+
+    $scope.follow_friend_branch = (branch_id)->
+      linkName = $('#new-leaf-name').val()
+
+    $scope.unfollow_friend_branch = (branch_id)->
+      linkName = $('#new-leaf-name').val()
+
+    $scope.edit_leaf = ()->
+      leafID = $scope.currentLeaf.id
+      linkName = $('#new-leaf-name').val()
+      linkUrl = $('#new-leaf-url').val()
+      console.log leafID, linkName, linkUrl, $scope.currentBranch.category.id
+      Services.update_link($scope.myTree.id, leafID, linkName, linkUrl, $scope.currentBranch.category.id).then (response)->
+        if response.success
+          for leaf in $scope.currentBranch.leafs
+            if leaf.id == response.leaf.id
+              leaf.link = response.leaf.link
+              break
+        $('.folder-input-container').removeClass('active')
+      return false
+
+    $scope.delete_leaf = (leaf)->
+      Services.delete_link($scope.myTree.id, leaf.id).then (response)->
+        if response.success
+          for i, leaf of $scope.currentBranch.leafs
+            if leaf.id == response.leaf.id
+              $scope.currentBranch.leafs.splice(i*1, 1);
+              break
+        $('.folder-input-container').removeClass('active')
       return false
 
     $scope.load_my_tree = ()->
@@ -502,14 +555,20 @@ ctrls.controller 'FoldersController',
       $scope.load_tree($scope.myTree)
 
     $scope.load_friend_tree = (friend_id)->
-      $('#folder-actions-buttons').hide()
-      $('#folder-actions').hide()
+      $('.folder-input-container').removeClass('active')
       Services.get_friend_trees(friend_id).then (friend)->
         $scope.load_tree(friend.trees[0])
 
     $scope.set_selected_button_tree = (e)->
-      $('#friends-container button').removeClass('selected-tree')
+      $('#roots-container button').removeClass('selected-tree')
       e.currentTarget.className += ' selected-tree'
 
+    $scope.is_my_tree = ()->
+      if ($scope.myTree && $scope.tree)
+        return  $scope.myTree.id == $scope.tree.id
+      return true
+
+    $scope.is_branch_followed = ()->
+      return false
 
     $scope.initialize()

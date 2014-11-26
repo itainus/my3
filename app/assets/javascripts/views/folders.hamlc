@@ -1,9 +1,9 @@
-.row
+.row#roots-container
+  %span
+    %button.btn.btn-sm.btn-primary.selected-tree{'ng-click'=>"set_selected_button_tree($event); load_my_tree()"}
+      %i.glyphicon.glyphicon-tree-deciduous
+        my-tree
   #friends-container
-    %span
-      %button.btn.btn-sm.btn-primary.selected-tree{'ng-click'=>"set_selected_button_tree($event); load_my_tree()"}
-        %i.glyphicon.glyphicon-tree-deciduous
-          my-tree
     %span{'ng-repeat' => "friend in friends"}
       %button.btn.btn-sm.btn-primary{'ng-click'=>"set_selected_button_tree($event); load_friend_tree(friend.id)"}
         %i.fa.fa-user
@@ -11,39 +11,68 @@
 %hr
 .row
   #folder-path
+    %span.friend-tree-branch-action-follow{'ng-if' => '!is_my_tree()'}
+      %i.fa.fa-star{'ng-if' => 'is_branch_followed()', 'ng-click'=>"unfollow_friend_branch(currentBranch.id)"}
+      %i.fa.fa-star-o{'ng-if' => '!is_branch_followed()', 'ng-click'=>"follow_friend_branch(currentBranch.id)"}
     %span{'ng-repeat' => "branch in path"}
       \/
-      %button.btn.btn-sm.btn-primary{'ng-click'=>"on_path_click(branch.id)"}
+      %button.btn.btn-sm.btn-primary{'ng-click'=>"set_path_current_branch(branch.id)"}
         %i
           {{branch.category.name}}
-    %span#folder-actions-buttons
-      %button.btn.btn-sm.btn-primary{'ng-click'=>"show_new_branch_input()"}
-        %i.fa.fa-plus
+    %span{'ng-if' => 'is_my_tree()'}
+      %button.btn.btn-sm.btn-primary.tree-branch-actions{'ng-click'=>"show_new_branch_input()"}
         %i.fa.fa-tag
-      %button.btn.btn-sm.btn-primary{'ng-click'=>"show_new_leaf_input()"}
-        %i.fa.fa-plus
+      %button.btn.btn-sm.btn-primary.tree-branch-actions{'ng-click'=>"show_new_leaf_input()"}
         %i.fa.fa-leaf
+      %button.btn.btn-sm.btn-primary.tree-branch-actions{'ng-click'=>"delete_branch(currentBranch.id)"}
+        %i.fa.fa-trash-o
+    %span{'ng-if' => '!is_my_tree()'}
+      %button.btn.btn-sm.btn-primary.tree-branch-actions{'ng-click'=>"add_friend_branch(currentBranch.id)"}
+        %i.fa.fa-tag
   %br
 
   #folder-actions
-    #new-branch-container{:style => 'display: none;'}
+    #new-branch-container.folder-input-container
       .input-group.col-md-12
         %span.input-group-addon
           %i.fa.fa-tag
-        %input#new-branch-name.form-control{:type=>"text", placeholder: "Category Name" }
+        %input#new-branch-name.form-control{:type=>"text", placeholder: "Category Name", 'ng-model' => 'categoryName'}
           %span.input-group-btn
             %button.btn.btn-default{:type=>"button", 'ng-click' => 'create_new_branch()'}
               Add Branch
-    #new-leaf-container{:style => 'display: none;'}
+    #new-leaf-container.folder-input-container
       .input-group.col-md-6
         %span.input-group-addon
           %i.fa.fa-leaf
-        %input#new-leaf-name.form-control{:type=>"text", placeholder: "Link Name"}
+        %input#new-leaf-name.form-control{:type=>"text", placeholder: "Link Name", 'ng-model' => 'currentLeaf.name'}
       .input-group.col-md-6
-        %input#new-leaf-url.form-control{:type=>"text", placeholder: "Link Url" }
+        %input#new-leaf-url.form-control{:type=>"text", placeholder: "Link Url", 'ng-model' => 'currentLeaf.link.url'}
           %span.input-group-btn
             %button.btn.btn-default{:type=>"button", 'ng-click' => 'create_new_leaf()'}
               Add Leaf
+    #edit-leaf-container.folder-input-container
+      .input-group.col-md-6
+        %span.input-group-addon
+          %i.fa.fa-leaf
+        %input#edit-leaf-name.form-control{:type=>"text", placeholder: "Link Name", 'ng-model' => 'currentLeaf.name'}
+      .input-group.col-md-6
+        %input#edit-leaf-url.form-control{:type=>"text", placeholder: "Link Url", 'ng-model' => 'currentLeaf.link.url'}
+          %span.input-group-btn
+            %button.btn.btn-default{:type=>"button", 'ng-click' => 'edit_leaf()'}
+              Edit Leaf
+
+  .col-md-6{'ng-if' => 'currentBranch.branches.length'}
+    %table.table
+      %thead.capitalize
+        %tr{'ng-show' => "currentBranch.branches"}
+          %th.panel_topic.text-primary
+            Branches
+      %tbody
+        %tr{'ng-repeat' => "branch in currentBranch.branches"}
+          %td
+            %button.btn.btn-sm.btn-primary{'ng-click'=>"set_path_current_branch(branch.id)"}
+              %i
+                {{get_branch_by_id(branch.id).category.name}}
   .col-md-6{'ng-if' => 'currentBranch.leafs.length'}
     %table.table
       %thead.capitalize
@@ -56,16 +85,13 @@
             %img{src: "http://g.etfv.co/{{leaf.link.url}}", width: "16px", height: "16px"}
             %a{target: "_blank", href:"{{leaf.link.url}}", title: "{{leaf.link.url}}"}
               {{leaf.name}}
-  .col-md-6{'ng-if' => 'currentBranch.branches.length'}
-    %table.table
-      %thead.capitalize
-        %tr{'ng-show' => "currentBranch.branches"}
-          %th.panel_topic.text-primary
-            Branches
-      %tbody
-        %tr{'ng-repeat' => "branch in currentBranch.branches"}
-          %td
-            %button.btn.btn-sm.btn-primary{'ng-click'=>"set_current_branch(branch.id)"}
-              %i
-                {{get_branch_by_id(branch.id).category.name}}
+          %td.my-tree-leaf-actions.tree-leaf-actions{'ng-if' => 'is_my_tree()'}
+            %button.btn.btn-sm.btn-primary{'ng-click'=>"show_edit_leaf_input(leaf)"}
+              %i.fa.fa-pencil
+            %button.btn.btn-sm.btn-primary{'ng-click'=>"delete_leaf(leaf)"}
+              %i.fa.fa-trash-o
+          %td.friend-tree-leaf-actions.tree-leaf-actions{'ng-if' => '!is_my_tree()'}
+            %button.btn.btn-sm.btn-primary{'ng-click'=>""}
+              %i.fa.fa-leaf
+
   .

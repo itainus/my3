@@ -24,6 +24,7 @@ Rails.application.routes.draw do
   get  "tree/:id" => "tree#index"
   get  "tree/:id/suggest_branch" => "tree#suggest_branch"
   post "tree/:id/branch_add" => "tree#add_branch"
+  post "tree/:id/branch_remove" => "tree#remove_branch"
   post "tree/:id/category_create" => "tree#create_new_category"
   post "tree/:id/category_add"    => "tree#add_category"
   post "tree/:id/category_remove" => "tree#remove_branch"

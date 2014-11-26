@@ -31,6 +31,8 @@ class Tree < ActiveRecord::Base
       else
         Rails.logger.info "[DEBUG INFO] category '#{category_id}' dose not exists"
       end
+    else
+      Rails.logger.info "[DEBUG INFO] branch with category_id '#{category_id}' already exists - branch_id = '#{branch.id}'"
     end
 
     branch
@@ -47,7 +49,6 @@ class Tree < ActiveRecord::Base
 
     if branch[:tree_id] == self.id
       Rails.logger.info "[DEBUG INFO] branch '#{branch_id}' already exists on tree #{self.ids}"
-
       return branch
     end
 
@@ -57,16 +58,12 @@ class Tree < ActiveRecord::Base
       category_id = branch.category.id
       my_branch = branch_category(category_id)
       if my_branch.present?
-
         branch.leafs.each do |l|
-          # leaf = my_branch.leafs.create(:branch_id => my_branch.id, :link_id => l.link.id, :name => l.name)
-          leaf = leaf_link(l.link, l.name)
+          leaf_link(l.link, l.name)
         end
-
         branch.branches.each do |b|
-          my_branch = branch_fully(b.id)
+          branch_fully(b.id)
         end
-
       else
         Rails.logger.info "[DEBUG INFO] failed to branch_category - category_id = '#{category_id}'"
       end
@@ -74,6 +71,7 @@ class Tree < ActiveRecord::Base
       Rails.logger.info "[DEBUG INFO] branch '#{branch_id}' dose not exists"
     end
 
+    Rails.logger.info "[DEBUG INFO] my_branch.id = '#{my_branch.id} - my_branch.category = '#{my_branch.category.name}'"
     my_branch
   end
 

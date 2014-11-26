@@ -24,16 +24,16 @@
   color: #3071a9;
 }
 
-#folder-actions-buttons {
-  float:right;
-}
+//#folder-actions-buttons {
+//  float:right;
+//}
 
-#folder-actions-buttons button{
-  background-image: linear-gradient(to bottom, #ffffff 0%, #e6e6e6 100%);
-  background-repeat: repeat-x;
-  border-color: #ccc;
-  color: black;
-}
+//#folder-actions-buttons button{
+//  background-image: linear-gradient(to bottom, #ffffff 0%, #e6e6e6 100%);
+//  background-repeat: repeat-x;
+//  border-color: #ccc;
+//  color: black;
+//}
 
 #friends-container {
   float: right;
@@ -43,4 +43,31 @@
 .selected-tree {
   background: white;
   color: #3071a9;
+}
+
+
+.folder-input-container {
+  display: none;
+}
+
+.folder-input-container.active {
+  display: block;
+}
+
+.tree-actions {
+  min-width: 90px;
+}
+
+.tree-branch-actions {
+  border-radius: 20px;
+  background-image: linear-gradient(to bottom, #ffffff 0%, #e6e6e6 100%);
+  background-repeat: repeat-x;
+  border-color: #ccc;
+  color: black;
+}
+
+.tree-leaf-actions button {
+  border: 1px solid #000000;
+  border-radius: 20px;
+  background: #000000;
 }

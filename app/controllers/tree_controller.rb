@@ -62,22 +62,41 @@ class TreeController < ApplicationController
     branch_id = params[:branch_id]
     Rails.logger.info "[DEBUG INFO] ############## TreeController - add_branch - branch_id = #{branch_id} ##############"
 
-    @tree.branch_fully(branch_id)
+    branch = @tree.branch_fully(branch_id)
 
-    render_tree
+    Rails.logger.info "[DEBUG INFO] tree.branch_fully(#{branch_id}) = #{branch.id} - #{branch.category.name}"
+
+    response = {
+        :success => !branch.nil?,
+        :parentBranch => branch,
+        :branches => []
+    }
+
+    render json: response.as_json
+    # render_tree
   end
 
   def remove_branch
     branch_id = params[:branch_id]
     Rails.logger.info "[DEBUG INFO] ############## TreeController - remove_branch - branch_id = #{branch_id} ##############"
 
+    success = true
+    x = nil
+
     if @tree.branches.exists?(branch_id)
-      @tree.branches.destroy(branch_id)
+      x = @tree.branches.destroy(branch_id)
     else
       Rails.logger.info "[DEBUG INFO] branch '#{branch_id}' dose not exists"
+      success = false
     end
 
-    render_tree
+    response = {
+        :success => success,
+        :x => x
+    }
+
+    render json: response.as_json
+    # render_tree
   end
 
   def create_new_link
@@ -153,6 +172,9 @@ class TreeController < ApplicationController
     leaf_id = params[:leaf_id]
     Rails.logger.info "[DEBUG INFO] ############## TreeController - remove_leaf - leaf_id = #{leaf_id} ##############"
 
+    leaf = nil
+    success = true
+
     if @tree.leaf_exists leaf_id
       leaf = Leaf.find(leaf_id)
       msg = {
@@ -166,9 +188,16 @@ class TreeController < ApplicationController
       Leaf.destroy(leaf_id)
     else
       Rails.logger.info "[DEBUG INFO] leaf '#{leaf_id}' dose not exists"
+      success = false
     end
 
-    render_tree
+    response = {
+        :success => success,
+        :leaf => leaf
+    }
+
+    render json: response.as_json
+    # render_tree
   end
 
   def update_leaf
@@ -176,17 +205,26 @@ class TreeController < ApplicationController
     link_name = params[:link_name]
     link_url = params[:link_url]
     link_category_id = params[:link_category_id]
+    success = true
+    leaf = nil
     Rails.logger.info "[DEBUG INFO] ############## TreeController - update_leaf - leaf_id = #{leaf_id} - new link_name = #{link_name}, new link_url = #{link_url}, new link_category_id = #{link_category_id}##############"
 
     if @tree.leaf_exists(leaf_id)
       link = Link.create_if_not_exists(link_url, link_category_id, nil)
       branch = @tree.branches.where(:category_id => link_category_id).first
-      Leaf.update(leaf_id, :name => link_name, :branch_id => branch.id, :link_id => link.id)
+      leaf = Leaf.update(leaf_id, :name => link_name, :branch_id => branch.id, :link_id => link.id)
     else
+      success = false
       Rails.logger.info "[DEBUG INFO] leaf '#{leaf_id}' dose not exists"
     end
 
-    render_tree
+    response = {
+        :success => success,
+        :leaf => leaf
+    }
+
+    render json: response.as_json
+    # render_tree
   end
 
   def suggest_branch
