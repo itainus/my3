@@ -217,7 +217,6 @@ ctrls.controller 'TreeController',
             return leaf
       return null
 
-
     $scope.get_branch_by_category_id = (category_id) ->
       for branch in $scope.tree.branches
         if (branch.category.id == category_id)
@@ -406,6 +405,7 @@ ctrls.controller 'FriendsController',
 
 ctrls.controller 'FoldersController',
   ($scope, Services)->
+
     $scope.initialize = ()->
       $scope.tree = null
       $scope.myTree = null
@@ -444,9 +444,28 @@ ctrls.controller 'FoldersController',
       $scope.path = tmpPath
       $scope.path.push(branch)
 
+    $scope.set_path_by_branch = (branch, path = [])->
+#      $scope.path = if path then path else []
+      if !branch.category
+        branch = $scope.get_branch_by_id(branch.id)
+
+      path.unshift(branch)
+      for b in $scope.tree.branches
+        for bb in b.branches
+          if bb.id == branch.id
+            return $scope.set_path_by_branch(b, path)
+      $scope.currentBranch = path[path.length-1] #branch
+      $scope.path = path
+
     $scope.get_branch_by_id = (branch_id)->
       for branch in $scope.tree.branches
         if branch.id == branch_id
+          return branch
+      return null
+
+    $scope.get_branch_by_category_id = (category_id) ->
+      for branch in $scope.tree.branches
+        if (branch.category.id == category_id)
           return branch
       return null
 
@@ -504,26 +523,26 @@ ctrls.controller 'FoldersController',
               $('.folder-input-container').removeClass('active')
               if response.success
                 parentBranch.branches.splice(i*1, 1);
-                $scope.set_path_current_branch(parentBranch.id)
+                $scope.set_path_by_branch(parentBranch)
             return true
       return false
 
-    $scope.add_friend_branch = (branch_id)->
-      Services.add_branch($scope.myTree.id, branch_id).then (response)->
+    $scope.add_friend_branch = (branch)->
+      Services.add_branch($scope.myTree.id, branch.id).then (response)->
         console.log response
         if response.success
-          branches = response.branches
-          parentBranch = response.parentBranch
+          $scope.myTree = response.tree
           $scope.load_my_tree()
-          $scope.set_path_current_branch(parentBranch.id)
+          myBranch = $scope.get_branch_by_category_id(branch.category.id)
+          $scope.set_path_by_branch(myBranch)
         $('.folder-input-container').removeClass('active')
       return false
 
     $scope.follow_friend_branch = (branch_id)->
-      linkName = $('#new-leaf-name').val()
+      $scope.fff = true
 
     $scope.unfollow_friend_branch = (branch_id)->
-      linkName = $('#new-leaf-name').val()
+      $scope.fff = false
 
     $scope.edit_leaf = ()->
       leafID = $scope.currentLeaf.id
@@ -553,6 +572,9 @@ ctrls.controller 'FoldersController',
       $('#folder-actions-buttons').show()
       $('#folder-actions').show()
       $scope.load_tree($scope.myTree)
+      $('#roots-container button').removeClass('selected-tree')
+      $('#my-tree-container button').addClass('selected-tree')
+
 
     $scope.load_friend_tree = (friend_id)->
       $('.folder-input-container').removeClass('active')
@@ -569,6 +591,6 @@ ctrls.controller 'FoldersController',
       return true
 
     $scope.is_branch_followed = ()->
-      return false
+      return !!$scope.fff
 
     $scope.initialize()

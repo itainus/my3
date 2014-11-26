@@ -1,8 +1,9 @@
 .row#roots-container
-  %span
-    %button.btn.btn-sm.btn-primary.selected-tree{'ng-click'=>"set_selected_button_tree($event); load_my_tree()"}
-      %i.glyphicon.glyphicon-tree-deciduous
-        my-tree
+  #my-tree-container
+    %span
+      %button.btn.btn-sm.btn-primary.selected-tree{'ng-click'=>"set_selected_button_tree($event); load_my_tree()"}
+        %i.glyphicon.glyphicon-tree-deciduous
+          my-tree
   #friends-container
     %span{'ng-repeat' => "friend in friends"}
       %button.btn.btn-sm.btn-primary{'ng-click'=>"set_selected_button_tree($event); load_friend_tree(friend.id)"}
@@ -16,7 +17,7 @@
       %i.fa.fa-star-o{'ng-if' => '!is_branch_followed()', 'ng-click'=>"follow_friend_branch(currentBranch.id)"}
     %span{'ng-repeat' => "branch in path"}
       \/
-      %button.btn.btn-sm.btn-primary{'ng-click'=>"set_path_current_branch(branch.id)"}
+      %button.btn.btn-sm.btn-primary{'ng-click'=>"set_path_by_branch(branch)"}
         %i
           {{branch.category.name}}
     %span{'ng-if' => 'is_my_tree()'}
@@ -27,7 +28,7 @@
       %button.btn.btn-sm.btn-primary.tree-branch-actions{'ng-click'=>"delete_branch(currentBranch.id)"}
         %i.fa.fa-trash-o
     %span{'ng-if' => '!is_my_tree()'}
-      %button.btn.btn-sm.btn-primary.tree-branch-actions{'ng-click'=>"add_friend_branch(currentBranch.id)"}
+      %button.btn.btn-sm.btn-primary.tree-branch-actions{'ng-click'=>"add_friend_branch(currentBranch)"}
         %i.fa.fa-tag
   %br
 
@@ -70,7 +71,8 @@
       %tbody
         %tr{'ng-repeat' => "branch in currentBranch.branches"}
           %td
-            %button.btn.btn-sm.btn-primary{'ng-click'=>"set_path_current_branch(branch.id)"}
+            -#%button.btn.btn-sm.btn-primary{'ng-click'=>"set_path_current_branch(branch.id)"}
+            %button.btn.btn-sm.btn-primary{'ng-click'=>"set_path_by_branch(branch)"}
               %i
                 {{get_branch_by_id(branch.id).category.name}}
   .col-md-6{'ng-if' => 'currentBranch.leafs.length'}

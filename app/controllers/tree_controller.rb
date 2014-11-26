@@ -68,8 +68,7 @@ class TreeController < ApplicationController
 
     response = {
         :success => !branch.nil?,
-        :parentBranch => branch,
-        :branches => []
+        :tree => @tree.as_json
     }
 
     render json: response.as_json
